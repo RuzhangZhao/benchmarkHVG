@@ -49,7 +49,7 @@ cite_mixpca_eval<-evaluate_hvg_continuous(pcalist=mipcalist,pro=pro,input="CITEs
 
 
 
-download pbmc file from [pbmc_rna.rds](https://github.com/RuzhangZhao/pbmc3k/blob/main/pbmc3k_rna.rds) and [pbmc_lsi.rds](https://github.com/RuzhangZhao/pbmc3k/blob/main/pbmc3k_lsi.rds)
+Download pbmc file from [pbmc_rna.rds](https://github.com/RuzhangZhao/pbmc3k/blob/main/pbmc3k_rna.rds) and [pbmc_lsi.rds](https://github.com/RuzhangZhao/pbmc3k/blob/main/pbmc3k_lsi.rds)
 
 ```R
 ## Example: MultiomeATAC
@@ -57,6 +57,8 @@ download pbmc file from [pbmc_rna.rds](https://github.com/RuzhangZhao/pbmc3k/blo
 ## Assume we have processed pbmc3k_multi
 ## and get pbmc3k_multi_rna_mat and pbmc3k_multi_lsi
 # baseline methods
+pbmc3k_multi_rna_mat<-readRDS("pbmc_rna.rds")
+pbmc3k_multi_lsi<-readRDS("pbmc_lsi.rds")[1:4,]
 pcalist<-hvg_pca(pbmc3k_multi_rna_mat)
 pcalist<-pcalist$seurat.obj.pca
 # mixture methods
