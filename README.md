@@ -49,6 +49,8 @@ cite_mixpca_eval<-evaluate_hvg_continuous(pcalist=mipcalist,pro=pro,input="CITEs
 
 
 
+download pbmc file from [pbmc_rna.rds](https://github.com/RuzhangZhao/pbmc3k/blob/main/pbmc3k_rna.rds) and [pbmc_lsi.rds](https://github.com/RuzhangZhao/pbmc3k/blob/main/pbmc3k_lsi.rds)
+
 ```R
 ## Example: MultiomeATAC
 ## pbmc3k_multi
