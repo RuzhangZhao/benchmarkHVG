@@ -1,14 +1,6 @@
 # Author: Ruzhang Zhao
 # Dataset loading can be found  under
 ## https://github.com/RuzhangZhao/scRNAseqProcess/blob/main/DatatsetLoading.R
-#library(scran)
-#library(MASS)
-#library(caret)
-#library(Seurat)
-#library(mclust)
-#library(FNN)
-#library(Rfast)
-#library(data.table)
 
 #' hvg_pca
 #'
