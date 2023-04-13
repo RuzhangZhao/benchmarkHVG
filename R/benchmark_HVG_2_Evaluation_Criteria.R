@@ -129,7 +129,7 @@ knn_accuracy<-function(embedding,cell_label,k = 3,cutoff = 3000){
     N_cell<-nrow(embedding)
     pre_label<-sapply(sample_index, function(cell){
         train_label<-cell_label[-cell]
-        a<-knn(train = embedding[-cell,],
+        a<-FNN::knn(train = embedding[-cell,],
                     test = embedding[cell,],
                     cl = train_label,k = k,prob = T)
         a[1]
@@ -313,7 +313,7 @@ knn_regression<-function(embedding,pro,k=3,
     }
     pred_val<-sapply(sample_index, function(cell){
         pro1<-pro[,-cell]
-        ind<-knn(train=embedding[-cell,],
+        ind<-FNN::knn(train=embedding[-cell,],
                     test= embedding[cell,],
                     cl = rep(1,nrow(embedding)-1),k=k)
         rowMeans(pro1[,attr(ind,"nn.index")[1,]])
@@ -346,7 +346,7 @@ knn_ratio<-function(embedding,pro,k = 100,
     k <- min(k,ceiling(N_cell/2))
     pro<-t(pro)
     dist_ratio<-sapply(sample_index, function(cell){
-        ind<-knn(train = embedding[-cell,],
+        ind<-FNN::knn(train = embedding[-cell,],
                     test = embedding[cell,],
                     cl = rep(1,nrow(embedding)-1),
                     k = k,prob = T)
