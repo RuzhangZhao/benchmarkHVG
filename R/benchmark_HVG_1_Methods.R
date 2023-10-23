@@ -18,7 +18,6 @@
 #' @import Seurat
 #' @import FNN
 #' @import Rfast
-#' @importFrom Seurat NormalizeData FindVariableFeatures VariableFeatures DefaultAssay
 #' @importFrom scran modelGeneVar modelGeneVarByPoisson
 #' @importFrom SingleCellExperiment SingleCellExperiment
 #' @importFrom scuttle logNormCounts
