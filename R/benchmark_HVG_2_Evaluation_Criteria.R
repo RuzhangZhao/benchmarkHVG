@@ -155,6 +155,14 @@ within_between_dist_ratio<-function(embedding,cell_label){
     if(sum(label_index == "") >0){
         label_index<-label_index[-which(label_index == "")]
     }
+
+    if (length(cell_label)>10000){
+        ids<-caret::createDataPartition(cell_label,p = 10000/length(cell_label))$Resample1
+        embedding<-embedding[ids,]
+        cell_label<-cell_label[ids]
+    }
+
+
     cell_label_unique<-unique(cell_label)
     ncell = length(cell_label)
     label_dist = matrix(1,ncell,ncell)
