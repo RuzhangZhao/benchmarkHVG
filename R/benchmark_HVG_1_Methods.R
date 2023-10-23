@@ -59,7 +59,6 @@ hvg_pca<-function(rna_mat,
 
     ######## 2. Most original var count ~ mean count
     message("Method2: mv_ct")
-    library(scran)
     seurat.obj2<-CreateSeuratObject(rna_mat,verbose = F)
     seurat.obj2<-NormalizeData(seurat.obj2,verbose = F)
 
@@ -86,7 +85,6 @@ hvg_pca<-function(rna_mat,
 
     #rna_mat_norm<-seurat.obj3@assays$RNA@data
     #rna_mat_norm@x<-exp(rna_mat_norm@x)-1
-    #library(scran)
     #sce <- SingleCellExperiment(list(counts=rna_mat_norm))
     #sce@assays@data$logcounts<-sce@assays@data$counts
     #dec <- modelGeneVar(sce)
@@ -332,7 +330,6 @@ hvg_pca<-function(rna_mat,
     #################################################
     #16.cell ranger selection (dispersion based, scanpy):
     message("Method16: cell ranger")
-    library(reticulate)
     sc = import("scanpy")
     seurat.obj16<-CreateSeuratObject(rna_mat,verbose = F)
     scanpy_rna=sc$AnnData( t((seurat.obj16@assays$RNA@counts)))
@@ -448,7 +445,6 @@ mixture_hvg_pca<-function(rna_mat,
     rna_mat_PFlog1pPF<-t(t(rna_mat_PFlog1pPF)/colSums(rna_mat_PFlog1pPF))*mean(colSums(rna_mat_PFlog1pPF))
 
 
-    library(scran)
     sce <- SingleCellExperiment(list(counts=rna_mat))
     sce <- logNormCounts(sce)
     dec <- modelGeneVar(sce)
@@ -478,7 +474,7 @@ mixture_hvg_pca<-function(rna_mat,
     seurat.obj10<-NormalizeData(seurat.obj10,verbose = F)
     rna_mat_norm<-seurat.obj10@assays$RNA@data
     rna_mat_norm@x<-exp(rna_mat_norm@x)-1
-    library(scran)
+    #library(scran)
     sce <- SingleCellExperiment(list(counts=rna_mat_norm))
     sce@assays@data$logcounts<-sce@assays@data$counts
     dec <- modelGeneVar(sce)
