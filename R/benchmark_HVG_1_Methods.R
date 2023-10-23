@@ -35,8 +35,8 @@
 hvg_pca<-function(rna_mat,
                   nfeatures = 2000){
 
-    seurat.obj0<-CreateSeuratObject(rna_mat)
-    rna_mat_PFlog1pPF<-t(t(seurat.obj0@assays$RNA@counts)/colSums(seurat.obj0@assays$RNA@counts))*mean(colSums(seurat.obj0@assays$RNA@counts))
+    #seurat.obj0<-CreateSeuratObject(rna_mat)
+    rna_mat_PFlog1pPF<-t(t(rna_mat)/colSums(rna_mat))*mean(colSums(rna_mat))
     rna_mat_PFlog1pPF<-log1p(rna_mat_PFlog1pPF)
     rna_mat_PFlog1pPF<-t(t(rna_mat_PFlog1pPF)/colSums(rna_mat_PFlog1pPF))*mean(colSums(rna_mat_PFlog1pPF))
 
@@ -360,23 +360,6 @@ hvg_pca<-function(rna_mat,
     rm(seurat.obj16)
     rm(scanpy_rna)
 
-    savis_nth<- function(x, k) {
-      if(sum(is.na(x))>0){
-        x[is.na(x)]<-min(x[!is.na(x)])-0.1
-      }
-      ## might have problem when k is too large for nan case
-      p <- length(x) - k
-      if(p < 0){
-        stop("savis_nth: input k too larger")
-      }else if(p == 0){
-        res<-1:length(x)
-      }else{
-        xp <- base::sort(x, partial=p)[p]
-        res<-which(x > xp)
-      }
-      res
-    }
-
 
     #################################################
     #17.highly expressed genes
@@ -458,9 +441,9 @@ mixture_hvg_pca<-function(rna_mat,
     seurat.obj.pca<-list()
     var.seurat.obj<-list()
 
-    seurat.obj0<-CreateSeuratObject(rna_mat,verbose = F)
-    rna_mat<-seurat.obj0@assays$RNA@counts
-    rm(seurat.obj0)
+    #seurat.obj0<-CreateSeuratObject(rna_mat,verbose = F)
+    ##rna_mat<-seurat.obj0@assays$RNA@counts
+    #rm(seurat.obj0)
     rna_mat_PFlog1pPF<-t(t(rna_mat)/colSums(rna_mat))*mean(colSums(rna_mat))
     rna_mat_PFlog1pPF<-log1p(rna_mat_PFlog1pPF)
     rna_mat_PFlog1pPF<-t(t(rna_mat_PFlog1pPF)/colSums(rna_mat_PFlog1pPF))*mean(colSums(rna_mat_PFlog1pPF))
