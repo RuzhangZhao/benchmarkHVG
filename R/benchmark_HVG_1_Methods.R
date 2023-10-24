@@ -34,10 +34,14 @@
 hvg_pca<-function(rna_mat,
                   nfeatures = 2000){
 
+
+    rna_mat_PFlog1pPF<-NormalizeData(rna_mat,scale.factor=mean(colSums(rna_mat)))
+    rna_mat_PFlog1pPF<-NormalizeData(rna_mat_PFlog1pPF,scale.factor=mean(colSums(rna_mat_PFlog1pPF)),normalization.method = "RC")
+
     #seurat.obj0<-CreateSeuratObject(rna_mat)
-    rna_mat_PFlog1pPF<-t(t(rna_mat)/colSums(rna_mat))*mean(colSums(rna_mat))
-    rna_mat_PFlog1pPF<-log1p(rna_mat_PFlog1pPF)
-    rna_mat_PFlog1pPF<-t(t(rna_mat_PFlog1pPF)/colSums(rna_mat_PFlog1pPF))*mean(colSums(rna_mat_PFlog1pPF))
+    #rna_mat_PFlog1pPF<-t(t(rna_mat)/colSums(rna_mat))*mean(colSums(rna_mat))
+    #rna_mat_PFlog1pPF<-log1p(rna_mat_PFlog1pPF)
+    #rna_mat_PFlog1pPF<-t(t(rna_mat_PFlog1pPF)/colSums(rna_mat_PFlog1pPF))*mean(colSums(rna_mat_PFlog1pPF))
 
     seurat.obj.pca<-list()
     var.seurat.obj<-list()
@@ -440,9 +444,12 @@ mixture_hvg_pca<-function(rna_mat,
     #seurat.obj0<-CreateSeuratObject(rna_mat,verbose = F)
     ##rna_mat<-seurat.obj0@assays$RNA@counts
     #rm(seurat.obj0)
-    rna_mat_PFlog1pPF<-t(t(rna_mat)/colSums(rna_mat))*mean(colSums(rna_mat))
-    rna_mat_PFlog1pPF<-log1p(rna_mat_PFlog1pPF)
-    rna_mat_PFlog1pPF<-t(t(rna_mat_PFlog1pPF)/colSums(rna_mat_PFlog1pPF))*mean(colSums(rna_mat_PFlog1pPF))
+    #rna_mat_PFlog1pPF<-t(t(rna_mat)/colSums(rna_mat))*mean(colSums(rna_mat))
+    #rna_mat_PFlog1pPF<-log1p(rna_mat_PFlog1pPF)
+    #rna_mat_PFlog1pPF<-t(t(rna_mat_PFlog1pPF)/colSums(rna_mat_PFlog1pPF))*mean(colSums(rna_mat_PFlog1pPF))
+
+    rna_mat_PFlog1pPF<-NormalizeData(rna_mat,scale.factor=mean(colSums(rna_mat)))
+    rna_mat_PFlog1pPF<-NormalizeData(rna_mat_PFlog1pPF,scale.factor=mean(colSums(rna_mat_PFlog1pPF)),normalization.method = "RC")
 
 
     sce <- SingleCellExperiment(list(counts=rna_mat))
