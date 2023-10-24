@@ -21,6 +21,7 @@
 #' @importFrom scran modelGeneVar modelGeneVarByPoisson
 #' @importFrom SingleCellExperiment SingleCellExperiment
 #' @importFrom scuttle logNormCounts
+#' @importFrom Matrix colSums
 #' @export
 #'
 #' @examples
@@ -33,8 +34,8 @@
 #'
 hvg_pca<-function(rna_mat,
                   nfeatures = 2000){
-    rna_mat_PFlog1pPF<-NormalizeData(rna_mat,scale.factor=mean(Matrix::colSums(rna_mat)),verbose=F)
-    rna_mat_PFlog1pPF<-NormalizeData(rna_mat_PFlog1pPF,scale.factor=mean(Matrix::colSums(rna_mat_PFlog1pPF)),normalization.method = "RC",verbose=F)
+    rna_mat_PFlog1pPF<-NormalizeData(rna_mat,scale.factor=mean(colSums(rna_mat)),verbose=F)
+    rna_mat_PFlog1pPF<-NormalizeData(rna_mat_PFlog1pPF,scale.factor=mean(colSums(rna_mat_PFlog1pPF)),normalization.method = "RC",verbose=F)
 
     #seurat.obj0<-CreateSeuratObject(rna_mat)
     #rna_mat_PFlog1pPF<-t(t(rna_mat)/colSums(rna_mat))*mean(colSums(rna_mat))
@@ -446,8 +447,8 @@ mixture_hvg_pca<-function(rna_mat,
     #rna_mat_PFlog1pPF<-log1p(rna_mat_PFlog1pPF)
     #rna_mat_PFlog1pPF<-t(t(rna_mat_PFlog1pPF)/colSums(rna_mat_PFlog1pPF))*mean(colSums(rna_mat_PFlog1pPF))
 
-    rna_mat_PFlog1pPF<-NormalizeData(rna_mat,scale.factor=mean(colSums(rna_mat)))
-    rna_mat_PFlog1pPF<-NormalizeData(rna_mat_PFlog1pPF,scale.factor=mean(colSums(rna_mat_PFlog1pPF)),normalization.method = "RC")
+    rna_mat_PFlog1pPF<-NormalizeData(rna_mat,scale.factor=mean(colSums(rna_mat)),verbose = F)
+    rna_mat_PFlog1pPF<-NormalizeData(rna_mat_PFlog1pPF,scale.factor=mean(colSums(rna_mat_PFlog1pPF)),normalization.method = "RC",verbose = F)
 
 
     sce <- SingleCellExperiment(list(counts=rna_mat))
