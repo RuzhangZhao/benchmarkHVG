@@ -336,7 +336,7 @@ hvg_pca<-function(rna_mat,
     message("Method16: cell ranger")
     sc = import("scanpy")
     seurat.obj16<-CreateSeuratObject(rna_mat,verbose = F)
-    scanpy_rna=sc$AnnData( t((seurat.obj16@assays$RNA@counts)))
+    scanpy_rna=sc$AnnData(t(as.matrix(seurat.obj16@assays$RNA@counts)))
     scanpy_rna$obs_names = as.character(1:ncol(rna_mat))
     scanpy_rna$var_names = rownames(rna_mat)
     #sc$pp$filter_cells(scanpy_rna, min_genes=200)
