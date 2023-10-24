@@ -18,6 +18,7 @@
 #' @import Seurat
 #' @import FNN
 #' @import Rfast
+#' @import reticulate
 #' @importFrom scran modelGeneVar modelGeneVarByPoisson
 #' @importFrom SingleCellExperiment SingleCellExperiment
 #' @importFrom scuttle logNormCounts
