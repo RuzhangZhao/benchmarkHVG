@@ -22,7 +22,7 @@
 #' @importFrom scran modelGeneVar modelGeneVarByPoisson
 #' @importFrom SingleCellExperiment SingleCellExperiment
 #' @importFrom scuttle logNormCounts
-#' @importFrom Matrix colSums
+#' @importFrom Matrix colSums rowSums
 #' @export
 #'
 #' @examples
@@ -49,7 +49,7 @@ hvg_pca<-function(rna_mat,
     #1.random
     message("Method1: random")
 
-    hvg<-sample(rownames(rna_mat)[which(rowSums(rna_mat)>0)],nfeatures)
+    hvg<-sample(rownames(rna_mat)[which(Matrix::rowSums(rna_mat)>0)],nfeatures)
 
     seurat.obj1<-CreateSeuratObject(rna_mat,verbose = F)
     seurat.obj1<-NormalizeData(seurat.obj1,verbose = F)
