@@ -413,10 +413,13 @@ evaluate_hvg_continuous<-function(pcalist,pro,
     variance_ratio<-rep(NA,Num_method)
     for(i in 1:Num_method){
         if(Nosample){
-            variance_ratio[i]<-within_between_var_ratio_continuous(pcalist[[i]][index_sample_pca,],pro[,index_sample_pca])
+            variance_ratio[i]<-within_between_var_ratio_continuous(pcalist[[i]][index_sample_pca,],
+                                                                   pro[,index_sample_pca])
         }else{
-            variance_ratio[i]<-(within_between_var_ratio_continuous(pcalist[[i]][index_sample_pca,],pro[,index_sample_pca])+
-                                    within_between_var_ratio_continuous(pcalist[[i]][index_sample_pca1,],pro[,index_sample_pca1]))/2
+            variance_ratio[i]<-(within_between_var_ratio_continuous(pcalist[[i]][index_sample_pca,],
+                                                                    pro[,index_sample_pca])+
+                                    within_between_var_ratio_continuous(pcalist[[i]][index_sample_pca1,],
+                                                                        pro[,index_sample_pca1]))/2
         }
     }
 
