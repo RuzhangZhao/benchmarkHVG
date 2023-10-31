@@ -396,7 +396,7 @@ evaluate_hvg_continuous<-function(pcalist,pro,
     }
     Num_method<-length(pcalist)
     Nosample<-FALSE
-    if(Num_method>10000){
+    if(ncol(pro)>10000){
         set.seed(1)
         index_sample_pca<-sample(1:ncol(pro),size = 10000)
         set.seed(2)
