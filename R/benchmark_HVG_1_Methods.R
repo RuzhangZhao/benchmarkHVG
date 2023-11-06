@@ -465,18 +465,19 @@ mixture_hvg_pca<-function(rna_mat,
                            c(1,2,3),c(1,2,4),c(1,2,5),c(1,3,4),c(1,3,5),c(1,4,5),
                            c(2,3,4),c(2,3,5),c(2,4,5),c(3,4,5),
                            c(1,2,3,4),c(1,2,3,5),c(1,2,4,5),c(1,3,4,5),c(2,3,4,5),
-                           c(1,2,3,4,5),c(1,2,3,4,5,6))
+                           c(1,2,3,4,5))
 
   for( i in 1:length(mixture_index_list) ){
-    index = mixture_index_list[i]
-
+    print(i)
+    index = mixture_index_list[[i]]
+    print(index)
     seurat.obj1<-CreateSeuratObject(rna_mat,verbose = F)
     seurat.obj1<-NormalizeData(seurat.obj1,verbose = F)
     seurat.obj1<-FindVariableFeaturesMix(seurat.obj1,method.names = method_list[index],nfeatures = nfeatures,verbose = F)
     seurat.obj1<-RunPCA(seurat.obj1,npcs=30,verbose=F)
 
-    seurat.obj.pca[[1]]<-seurat.obj1@reductions$pca@cell.embeddings
-    var.seurat.obj[[1]]<-VariableFeatures(seurat.obj1)
+    seurat.obj.pca[[i]]<-seurat.obj1@reductions$pca@cell.embeddings
+    var.seurat.obj[[i]]<-VariableFeatures(seurat.obj1)
 
   }
 
