@@ -8,7 +8,11 @@ Select input from "MultiomeATAC" or "CITEseq}
 evaluate_hvg_continuous(pcalist, pro, input = "MultiomeATAC")
 }
 \arguments{
-\item{input}{}
+\item{pcalist}{pcalist}
+
+\item{pro}{protein}
+
+\item{input}{input type}
 }
 \value{
 var_ratio

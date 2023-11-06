@@ -7,7 +7,13 @@
 knn_accuracy(embedding, cell_label, k = 3, cutoff = 3000)
 }
 \arguments{
-\item{cutoff}{}
+\item{embedding}{embedding}
+
+\item{cell_label}{cell_label}
+
+\item{k}{k}
+
+\item{cutoff}{cutoff}
 }
 \description{
 Criterion 3: Nearest Neighbor Accuracy

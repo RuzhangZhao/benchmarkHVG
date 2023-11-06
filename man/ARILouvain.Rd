@@ -6,6 +6,13 @@
 \usage{
 ARILouvain(embedding, cell_label, maxit = 25)
 }
+\arguments{
+\item{embedding}{embedding}
+
+\item{cell_label}{cell_label}
+
+\item{maxit}{maxit}
+}
 \description{
 Criterion 1: ARI
 }

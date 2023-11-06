@@ -7,7 +7,13 @@
 knn_regression(embedding, pro, k = 3, cutoff = 2000)
 }
 \arguments{
-\item{cutoff}{}
+\item{embedding}{embedding}
+
+\item{pro}{pro}
+
+\item{k}{k}
+
+\item{cutoff}{cutoff}
 }
 \description{
 Criterion 2: Nearest Neighbor Mean Square Error

@@ -4,7 +4,9 @@
 #' Criterion 1: ARI
 #' @details
 #'
-#' @param
+#' @param embedding embedding
+#' @param cell_label cell_label
+#' @param maxit maxit
 #'
 #'
 #' @return
@@ -78,8 +80,8 @@ ARILouvain<-function(
 #' Criterion 2: Within VS Between Cell Type Variance Ratio
 #' @details
 #'
-#' @param embedding
-#' @param cell_label
+#' @param embedding embedding
+#' @param cell_label cell_label
 #'
 #'
 #' @return
@@ -107,10 +109,10 @@ within_between_var_ratio<-function(embedding,cell_label){
 #' Criterion 3: Nearest Neighbor Accuracy
 #' @details
 #'
-#' @param embedding
-#' @param cell_label
-#' @param k
-#' @param cutoff
+#' @param embedding embedding
+#' @param cell_label cell_label
+#' @param k k
+#' @param cutoff cutoff
 #'
 #'
 #' @return
@@ -140,8 +142,9 @@ knn_accuracy<-function(embedding,cell_label,k = 3,cutoff = 3000){
 #' Criterion 4: Within VS Between Cell Type Distance Ratio
 #' @details
 #'
-#' @param embedding
-#' @param cell_label
+#' @importFrom stats dist
+#' @param embedding embedding
+#' @param cell_label cell_label
 #'
 #'
 #' @return
@@ -176,8 +179,8 @@ within_between_dist_ratio<-function(embedding,cell_label){
 #' Comprehensive Evaluation for cell sorting.
 #' @details
 #'
-#' @param pcalist
-#' @param label
+#' @param pcalist pcalist
+#' @param label label
 #'
 #' @importFrom caret createDataPartition
 #' @return var_ratio
@@ -261,9 +264,9 @@ evaluate_hvg_discrete<-function(pcalist,label){
 #' Criterion 1: Variance Ratio
 #' @details
 #'
-#' @param embedding
-#' @param pro
-#' @param resolution
+#' @param embedding embedding
+#' @param pro pro
+#' @param resolution resolution
 #'
 #' @import Seurat
 #' @importFrom Rfast rowVars
@@ -302,10 +305,10 @@ within_between_var_ratio_continuous<-function(
 #' Criterion 2: Nearest Neighbor Mean Square Error
 #' @details
 #'
-#' @param embedding
-#' @param pro
-#' @param k
-#' @param cutoff
+#' @param embedding embedding
+#' @param pro pro
+#' @param k k
+#' @param cutoff cutoff
 #'
 #' @importFrom FNN knn
 #' @return
@@ -321,7 +324,7 @@ knn_regression<-function(embedding,pro,k=3,
     }
     pred_val<-sapply(sample_index, function(cell){
         pro1<-pro[,-cell]
-        ind<-FNN::knn(train=embedding[-cell,],
+        ind<-knn(train=embedding[-cell,],
                     test= embedding[cell,],
                     cl = rep(1,nrow(embedding)-1),k=k)
         rowMeans(pro1[,attr(ind,"nn.index")[1,]])
@@ -332,10 +335,10 @@ knn_regression<-function(embedding,pro,k=3,
 #' Criterion 3: Nearest Neighbor Distance Ratio
 #' @details
 #'
-#' @param embedding
-#' @param pro
-#' @param k
-#' @param cutoff
+#' @param embedding embedding
+#' @param pro protein
+#' @param k k
+#' @param cutoff cutoff
 #'
 #' @importFrom FNN knn
 #' @importFrom pdist pdist
@@ -374,11 +377,12 @@ knn_ratio<-function(embedding,pro,k = 100,
 #' Select input from "MultiomeATAC" or "CITEseq
 #' @details
 #'
-#' @param pcalist
-#' @param pro
-#' @param input
+#' @param pcalist pcalist
+#' @param pro protein
+#' @param input input type
 #'
 #' @import Seurat
+#' @importFrom stats cor dist
 #' @return var_ratio
 #' @return knn_ratio
 #' @return 3nn

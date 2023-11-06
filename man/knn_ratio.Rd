@@ -7,7 +7,13 @@
 knn_ratio(embedding, pro, k = 100, cutoff = 2000)
 }
 \arguments{
-\item{cutoff}{}
+\item{embedding}{embedding}
+
+\item{pro}{protein}
+
+\item{k}{k}
+
+\item{cutoff}{cutoff}
 }
 \description{
 Criterion 3: Nearest Neighbor Distance Ratio

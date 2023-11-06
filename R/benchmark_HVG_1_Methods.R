@@ -16,9 +16,8 @@
 #' @import Matrix
 #' @import scran
 #' @import Seurat
-#' @import FNN
-#' @import Rfast
 #' @import reticulate
+#' @importFrom FNN knn
 #' @importFrom scran modelGeneVar modelGeneVarByPoisson
 #' @importFrom SingleCellExperiment SingleCellExperiment
 #' @importFrom scuttle logNormCounts
@@ -449,9 +448,8 @@ hvg_pca<-function(rna_mat,
 #' @import mixhvg
 #' @import scran
 #' @import Seurat
-#' @import FNN
-#' @import Rfast
 #' @import reticulate
+#' @importFrom FNN knn
 #' @importFrom SingleCellExperiment SingleCellExperiment
 #' @importFrom scuttle logNormCounts
 #' @export

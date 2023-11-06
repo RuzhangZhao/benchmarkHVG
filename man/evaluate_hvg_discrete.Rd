@@ -7,7 +7,9 @@
 evaluate_hvg_discrete(pcalist, label)
 }
 \arguments{
-\item{label}{}
+\item{pcalist}{pcalist}
+
+\item{label}{label}
 }
 \value{
 var_ratio

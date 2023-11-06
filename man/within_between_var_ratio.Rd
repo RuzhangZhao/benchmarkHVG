@@ -7,7 +7,9 @@
 within_between_var_ratio(embedding, cell_label)
 }
 \arguments{
-\item{cell_label}{}
+\item{embedding}{embedding}
+
+\item{cell_label}{cell_label}
 }
 \description{
 Criterion 2: Within VS Between Cell Type Variance Ratio

@@ -7,7 +7,11 @@
 within_between_var_ratio_continuous(embedding, pro, resolution = 0.2)
 }
 \arguments{
-\item{resolution}{}
+\item{embedding}{embedding}
+
+\item{pro}{pro}
+
+\item{resolution}{resolution}
 }
 \description{
 Criterion 1: Variance Ratio
