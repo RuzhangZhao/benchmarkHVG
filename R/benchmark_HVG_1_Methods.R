@@ -474,6 +474,7 @@ mixture_hvg_pca<-function(rna_mat,
     seurat.obj1<-CreateSeuratObject(rna_mat,verbose = F)
     seurat.obj1<-NormalizeData(seurat.obj1,verbose = F)
     seurat.obj1<-FindVariableFeaturesMix(seurat.obj1,method.names = method_list[index],nfeatures = nfeatures,verbose = F)
+    seurat.obj1<-ScaleData(seurat.obj1,verbose = F)
     seurat.obj1<-RunPCA(seurat.obj1,npcs=30,verbose=F)
 
     seurat.obj.pca[[i]]<-seurat.obj1@reductions$pca@cell.embeddings
