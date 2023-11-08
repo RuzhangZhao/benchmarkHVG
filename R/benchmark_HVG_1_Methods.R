@@ -488,23 +488,35 @@ mixture_hvg_pca<-function(rna_mat,
   return(newList)
 }
 
-# saved as paste0(save_path,dataset_name,"_pcalist_mixture.rds")
+#' mixture_hvg_pca0
+#'
+#' @details
+#'
+#' @param rna_mat input scRNA-seq count matrix
+#' @param nfeatures Number of features to select as top variable features.
+#'
+#'
+#' @return seurat.obj.pca:  a list of PCA.
+#' @return var.seurat.obj:
+#'
+#' @import Matrix
+#' @import mixhvg
+#' @import scran
+#' @import Seurat
+#' @import reticulate
+#' @importFrom FNN knn
+#' @importFrom SingleCellExperiment SingleCellExperiment
+#' @importFrom scuttle logNormCounts
+#' @export
+#'
 mixture_hvg_pca0<-function(rna_mat,
                           nfeatures = 2000){
 
     seurat.obj.pca<-list()
     var.seurat.obj<-list()
 
-    #seurat.obj0<-CreateSeuratObject(rna_mat,verbose = F)
-    ##rna_mat<-seurat.obj0@assays$RNA@counts
-    #rm(seurat.obj0)
-    #rna_mat_PFlog1pPF<-t(t(rna_mat)/colSums(rna_mat))*mean(colSums(rna_mat))
-    #rna_mat_PFlog1pPF<-log1p(rna_mat_PFlog1pPF)
-    #rna_mat_PFlog1pPF<-t(t(rna_mat_PFlog1pPF)/colSums(rna_mat_PFlog1pPF))*mean(colSums(rna_mat_PFlog1pPF))
-
     rna_mat_PFlog1pPF<-NormalizeData(rna_mat,scale.factor=mean(colSums(rna_mat)),verbose = F)
     rna_mat_PFlog1pPF<-NormalizeData(rna_mat_PFlog1pPF,scale.factor=mean(colSums(rna_mat_PFlog1pPF)),normalization.method = "RC",verbose = F)
-
 
     sce <- SingleCellExperiment(list(counts=rna_mat))
     sce <- logNormCounts(sce)
