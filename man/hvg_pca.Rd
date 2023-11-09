@@ -4,12 +4,14 @@
 \alias{hvg_pca}
 \title{hvg_pca}
 \usage{
-hvg_pca(rna_mat, nfeatures = 2000)
+hvg_pca(rna_mat, nfeatures = 2000, SCT = TRUE)
 }
 \arguments{
 \item{rna_mat}{input scRNA-seq count matrix}
 
 \item{nfeatures}{Number of features to select as top variable features.}
+
+\item{SCT}{input SCT}
 }
 \value{
 seurat.obj.pca:  a list of PCA.

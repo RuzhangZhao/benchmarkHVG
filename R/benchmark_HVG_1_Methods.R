@@ -8,6 +8,7 @@
 #'
 #' @param rna_mat input scRNA-seq count matrix
 #' @param nfeatures Number of features to select as top variable features.
+#' @param SCT input SCT
 #'
 #'
 #' @return seurat.obj.pca:  a list of PCA.
@@ -33,7 +34,7 @@
 #' }
 #'
 hvg_pca<-function(rna_mat,
-                  nfeatures = 2000){
+                  nfeatures = 2000,SCT=TRUE){
     rna_mat_PFlog1pPF<-NormalizeData(rna_mat,scale.factor=mean(Matrix::colSums(rna_mat)),verbose=F)
     rna_mat_PFlog1pPF<-NormalizeData(rna_mat_PFlog1pPF,scale.factor=mean(Matrix::colSums(rna_mat_PFlog1pPF)),normalization.method = "RC",verbose=F)
 
@@ -417,15 +418,17 @@ hvg_pca<-function(rna_mat,
 
     rm(seurat.obj20)
 
-    #################################################
-    #21.Seurat SCT
-    message("Method21: SCT")
-    seurat.obj21<-CreateSeuratObject(rna_mat,verbose = F)
-    seurat.obj21<-SCTransform(seurat.obj21,variable.features.n=2000,verbose = F)
-    seurat.obj21<-RunPCA(seurat.obj21,npcs=30,verbose=F)
+    if(SCT){
+      #################################################
+      #21.Seurat SCT
+      message("Method21: SCT")
+      seurat.obj21<-CreateSeuratObject(rna_mat,verbose = F)
+      seurat.obj21<-SCTransform(seurat.obj21,variable.features.n=2000,verbose = F)
+      seurat.obj21<-RunPCA(seurat.obj21,npcs=30,verbose=F)
 
-    seurat.obj.pca[[21]]<-seurat.obj21@reductions$pca@cell.embeddings
-    var.seurat.obj[[21]]<-VariableFeatures(seurat.obj21)
+      seurat.obj.pca[[21]]<-seurat.obj21@reductions$pca@cell.embeddings
+      var.seurat.obj[[21]]<-VariableFeatures(seurat.obj21)
+    }
 
     list("seurat.obj.pca"=seurat.obj.pca,
          "var.seurat.obj"=var.seurat.obj)
