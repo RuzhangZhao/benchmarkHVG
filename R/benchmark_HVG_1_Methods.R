@@ -442,6 +442,7 @@ hvg_pca<-function(rna_mat,
 #'
 #' @param rna_mat input scRNA-seq count matrix
 #' @param nfeatures Number of features to select as top variable features.
+#' @param method_list method_list
 #'
 #'
 #' @return seurat.obj.pca:  a list of PCA.
@@ -458,12 +459,12 @@ hvg_pca<-function(rna_mat,
 #' @export
 #'
 mixture_hvg_pca<-function(rna_mat,
-                          nfeatures = 2000){
+                          nfeatures = 2000,
+                          method_list=c("mv_nc","mv_lognc","scran_pos","seuratv1","mean_max_ct")){
 
   seurat.obj.pca<-list()
   var.seurat.obj<-list()
 
-  method_list<-c("mv_nc","mv_lognc","scran_pos","seuratv1","mean_max_ct")
   mixture_index_list<-list(c(1,2),c(1,3),c(1,4),c(1,5),c(2,3),c(2,4),c(2,5),c(3,4),c(3,5),c(4,5),
                            c(1,2,3),c(1,2,4),c(1,2,5),c(1,3,4),c(1,3,5),c(1,4,5),
                            c(2,3,4),c(2,3,5),c(2,4,5),c(3,4,5),

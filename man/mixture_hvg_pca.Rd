@@ -4,12 +4,18 @@
 \alias{mixture_hvg_pca}
 \title{mixture_hvg_pca}
 \usage{
-mixture_hvg_pca(rna_mat, nfeatures = 2000)
+mixture_hvg_pca(
+  rna_mat,
+  nfeatures = 2000,
+  method_list = c("mv_nc", "mv_lognc", "scran_pos", "seuratv1", "mean_max_ct")
+)
 }
 \arguments{
 \item{rna_mat}{input scRNA-seq count matrix}
 
 \item{nfeatures}{Number of features to select as top variable features.}
+
+\item{method_list}{method_list}
 }
 \value{
 seurat.obj.pca:  a list of PCA.

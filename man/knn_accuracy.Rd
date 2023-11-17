@@ -4,7 +4,7 @@
 \alias{knn_accuracy}
 \title{Criterion 3: Nearest Neighbor Accuracy}
 \usage{
-knn_accuracy(embedding, cell_label, k = 3, cutoff = 3000)
+knn_accuracy(embedding, cell_label, k = 3)
 }
 \arguments{
 \item{embedding}{embedding}

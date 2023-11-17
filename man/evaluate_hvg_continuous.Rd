@@ -5,7 +5,12 @@
 \title{Comprehensive Evaluation for CITEseq & MultiomeATAC
 Select input from "MultiomeATAC" or "CITEseq}
 \usage{
-evaluate_hvg_continuous(pcalist, pro, input = "MultiomeATAC")
+evaluate_hvg_continuous(
+  pcalist,
+  pro,
+  input = "MultiomeATAC",
+  dataset_name = NULL
+)
 }
 \arguments{
 \item{pcalist}{pcalist}
@@ -13,6 +18,8 @@ evaluate_hvg_continuous(pcalist, pro, input = "MultiomeATAC")
 \item{pro}{protein}
 
 \item{input}{input type}
+
+\item{dataset_name}{dataset_name}
 }
 \value{
 var_ratio

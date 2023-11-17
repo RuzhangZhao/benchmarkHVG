@@ -121,22 +121,22 @@ within_between_var_ratio<-function(embedding,cell_label){
 #' @importFrom FNN knn
 #' @export
 #'
-knn_accuracy<-function(embedding,cell_label,k = 3,cutoff = 3000){
-    if (length(cell_label) > cutoff){
-        sample_index<-createDataPartition(cell_label,p = cutoff/length(cell_label))$Resample1
-    }else{
-        sample_index<-1:length(cell_label)
-    }
+knn_accuracy<-function(embedding,cell_label,k = 3){
+    #if (length(cell_label) > cutoff){
+    #    sample_index<-createDataPartition(cell_label,p = cutoff/length(cell_label))$Resample1
+    #}else{
+    #    sample_index<-1:length(cell_label)
+    #}
 
     N_cell<-nrow(embedding)
-    pre_label<-sapply(sample_index, function(cell){
+    pre_label<-sapply(1:length(cell_label), function(cell){
         train_label<-cell_label[-cell]
         a<-FNN::knn(train = embedding[-cell,],
                     test = embedding[cell,],
                     cl = train_label,k = k,prob = T)
         a[1]
     })
-    sum(pre_label == cell_label[sample_index])/length(sample_index)
+    sum(pre_label == cell_label)/length(cell_label)
 }
 
 #' Criterion 4: Within VS Between Cell Type Distance Ratio
@@ -216,6 +216,12 @@ evaluate_hvg_discrete<-function(pcalist,label){
         }
     }
 
+    if(!Nosample){
+        set.seed(3)
+        index_sample_pca<-createDataPartition(label,p = min(1,10000/length(label)))$Resample1
+        set.seed(4)
+        index_sample_pca1<-createDataPartition(label,p = min(1,10000/length(label)))$Resample1
+    }
     #################################################
     # ARI with Louvain clustering  same number
     message("ari_louvain")
@@ -233,7 +239,10 @@ evaluate_hvg_discrete<-function(pcalist,label){
     # 3NN accuracy
     message("3nn")
     nn_acc<-rep(NA,Num_method)
-
+    if(!Nosample){
+        set.seed(5)
+        index_sample_pca<-createDataPartition(label,p = min(1,10000/length(label)))$Resample1
+    }
     for(i in 1:Num_method){
         if(Nosample){
             nn_acc[i]<-knn_accuracy(pcalist[[i]],label)
@@ -246,11 +255,20 @@ evaluate_hvg_discrete<-function(pcalist,label){
     # Distance Ratio
     dist_ratio<-rep(NA,Num_method)
 
+    if(!Nosample){
+        set.seed(6)
+        index_sample_pca<-createDataPartition(label,p = min(1,10000/length(label)))$Resample1
+        set.seed(7)
+        index_sample_pca1<-createDataPartition(label,p = min(1,10000/length(label)))$Resample1
+    }
+
     for(i in 1:Num_method){
         if(Nosample){
             dist_ratio[i]<-within_between_dist_ratio(pcalist[[i]],label)
         }else{
-            dist_ratio[i]<-within_between_dist_ratio(pcalist[[i]][index_sample_pca,],label[index_sample_pca])
+            dist_ratio[i]<-
+                (within_between_dist_ratio(pcalist[[i]][index_sample_pca,],label[index_sample_pca])+
+                     within_between_dist_ratio(pcalist[[i]][index_sample_pca1,],label[index_sample_pca1]))/2
         }
     }
     return(list(
@@ -316,7 +334,7 @@ within_between_var_ratio_continuous<-function(
 #' @export
 #'
 knn_regression<-function(embedding,pro,k=3,
-                         cutoff = 2000){
+                         cutoff = 5000){
     if (nrow(embedding) > cutoff){
         sample_index<-sample(1:nrow(embedding),size = cutoff)
     }else{
@@ -347,7 +365,7 @@ knn_regression<-function(embedding,pro,k=3,
 #' @export
 #'
 knn_ratio<-function(embedding,pro,k = 100,
-                    cutoff = 2000){
+                    cutoff = 5000){
     if (nrow(embedding) > cutoff){
         sample_index<-sample(1:nrow(embedding),size = cutoff)
     }else{
@@ -380,6 +398,7 @@ knn_ratio<-function(embedding,pro,k = 100,
 #' @param pcalist pcalist
 #' @param pro protein
 #' @param input input type
+#' @param dataset_name dataset_name
 #'
 #' @import Seurat
 #' @importFrom stats cor dist
@@ -391,7 +410,12 @@ knn_ratio<-function(embedding,pro,k = 100,
 #' @export
 #'
 evaluate_hvg_continuous<-function(pcalist,pro,
-                               input="MultiomeATAC" ){
+                               input="MultiomeATAC",dataset_name=NULL){
+    if(is.null(dataset_name)){
+        cur_resolution=resolutionlist[[dataset_name]]
+    }else{
+        cur_resolution=0.2
+    }
     if (input == "CITEseq"){
         scale_pro<-CreateSeuratObject(pro,verbose=FALSE)
         scale_pro <- NormalizeData(scale_pro, normalization.method = "CLR", margin = 2,verbose=F)
@@ -405,6 +429,8 @@ evaluate_hvg_continuous<-function(pcalist,pro,
         index_sample_pca<-sample(1:ncol(pro),size = 10000)
         set.seed(2)
         index_sample_pca1<-sample(1:ncol(pro),size = 10000)
+        set.seed(3)
+        index_sample_pca2<-sample(1:ncol(pro),size = 10000)
     }else{
         index_sample_pca<-1:ncol(pro)
         Nosample<-TRUE
@@ -418,12 +444,14 @@ evaluate_hvg_continuous<-function(pcalist,pro,
     for(i in 1:Num_method){
         if(Nosample){
             variance_ratio[i]<-within_between_var_ratio_continuous(pcalist[[i]][index_sample_pca,],
-                                                                   pro[,index_sample_pca])
+                                                                   pro[,index_sample_pca],cur_resolution)
         }else{
             variance_ratio[i]<-(within_between_var_ratio_continuous(pcalist[[i]][index_sample_pca,],
-                                                                    pro[,index_sample_pca])+
+                                                                    pro[,index_sample_pca],cur_resolution)+
                                     within_between_var_ratio_continuous(pcalist[[i]][index_sample_pca1,],
-                                                                        pro[,index_sample_pca1]))/2
+                                                                        pro[,index_sample_pca1],cur_resolution)+
+                                    within_between_var_ratio_continuous(pcalist[[i]][index_sample_pca2,],
+                                                                        pro[,index_sample_pca2],cur_resolution))/3
         }
     }
 
@@ -431,6 +459,12 @@ evaluate_hvg_continuous<-function(pcalist,pro,
     # Within Nearest Neighbor VS Out of Nearest Neighbor Distance Ratio
     message("knn_ratio")
     knnratio<-rep(NA,Num_method)
+
+    if(ncol(pro)>10000){
+        set.seed(4)
+        index_sample_pca<-sample(1:ncol(pro),size = 10000)
+    }
+
     for(i in 1:Num_method){
         knnratio[i]<-knn_ratio(pcalist[[i]][index_sample_pca,],pro[,index_sample_pca])
     }
@@ -440,6 +474,10 @@ evaluate_hvg_continuous<-function(pcalist,pro,
     # 3NN Regression MSE
     message("3nn")
     nn_mse<-rep(NA,Num_method)
+    if(ncol(pro)>10000){
+        set.seed(5)
+        index_sample_pca<-sample(1:ncol(pro),size = 10000)
+    }
     for(i in 1:Num_method){
         nn_mse[i]<-knn_regression(pcalist[[i]][index_sample_pca,],pro[,index_sample_pca])
     }
@@ -447,6 +485,10 @@ evaluate_hvg_continuous<-function(pcalist,pro,
     #################################################
     # Distance Correlation
     dist_cor<-rep(NA,Num_method)
+    if(ncol(pro)>10000){
+        set.seed(4)
+        index_sample_pca<-sample(1:ncol(pro),size = 10000)
+    }
     pro_dist<-dist(t(pro[,index_sample_pca]))
     for(i in 1:Num_method){
         pc_dist<-dist(pcalist[[i]][index_sample_pca,])
@@ -475,3 +517,19 @@ resolutionlist[["lymphoma"]] = 0.05
 resolutionlist[["mus_brain5k"]] = 0.1
 resolutionlist[["pbmc3k_multi"]] = 0.1
 resolutionlist[["pbmc10k_multi"]] = 0.1
+
+resolutionlist = list()
+resolutionlist[["bmcite"]] = 0.1
+resolutionlist[["cbmc_pbmc"]] = 0.2
+resolutionlist[["cbmc8k"]] = 0.1
+resolutionlist[["CD34"]] = 0.05
+resolutionlist[["fetalBM"]] = 0.1
+resolutionlist[["seurat_cite"]] = 0.08
+resolutionlist[["Sucovid"]] = 0.3
+resolutionlist[["human_brain_3k"]] = 0.15
+resolutionlist[["lymphoma_14k"]] = 0.05
+resolutionlist[["mouse_brain_fresh_5k"]] = 0.1
+resolutionlist[["pbmc3k"]] = 0.1
+resolutionlist[["pbmc10k"]] = 0.1
+resolutionlist[["snare"]] = 0.1
+

@@ -4,7 +4,7 @@
 \alias{knn_ratio}
 \title{Criterion 3: Nearest Neighbor Distance Ratio}
 \usage{
-knn_ratio(embedding, pro, k = 100, cutoff = 2000)
+knn_ratio(embedding, pro, k = 100, cutoff = 5000)
 }
 \arguments{
 \item{embedding}{embedding}
