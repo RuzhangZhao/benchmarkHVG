@@ -112,7 +112,6 @@ within_between_var_ratio<-function(embedding,cell_label){
 #' @param embedding embedding
 #' @param cell_label cell_label
 #' @param k k
-#' @param cutoff cutoff
 #'
 #'
 #' @return

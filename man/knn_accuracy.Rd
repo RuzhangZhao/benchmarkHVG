@@ -12,8 +12,6 @@ knn_accuracy(embedding, cell_label, k = 3)
 \item{cell_label}{cell_label}
 
 \item{k}{k}
-
-\item{cutoff}{cutoff}
 }
 \description{
 Criterion 3: Nearest Neighbor Accuracy
