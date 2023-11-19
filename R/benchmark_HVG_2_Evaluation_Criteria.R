@@ -195,9 +195,9 @@ evaluate_hvg_discrete<-function(pcalist,label){
     if(length(label)<10000){Nosample<-TRUE}
 
     if(!Nosample){
-        set.seed(1)
+        set.seed(10)
         index_sample_pca<-createDataPartition(label,p = min(1,10000/length(label)))$Resample1
-        set.seed(2)
+        set.seed(20)
         index_sample_pca1<-createDataPartition(label,p = min(1,10000/length(label)))$Resample1
     }
 
@@ -216,9 +216,9 @@ evaluate_hvg_discrete<-function(pcalist,label){
     }
 
     if(!Nosample){
-        set.seed(3)
+        set.seed(30)
         index_sample_pca<-createDataPartition(label,p = min(1,10000/length(label)))$Resample1
-        set.seed(4)
+        set.seed(40)
         index_sample_pca1<-createDataPartition(label,p = min(1,10000/length(label)))$Resample1
     }
     #################################################
@@ -239,7 +239,7 @@ evaluate_hvg_discrete<-function(pcalist,label){
     message("3nn")
     nn_acc<-rep(NA,Num_method)
     if(!Nosample){
-        set.seed(5)
+        set.seed(50)
         index_sample_pca<-createDataPartition(label,p = min(1,10000/length(label)))$Resample1
     }
     for(i in 1:Num_method){
@@ -255,9 +255,9 @@ evaluate_hvg_discrete<-function(pcalist,label){
     dist_ratio<-rep(NA,Num_method)
 
     if(!Nosample){
-        set.seed(6)
+        set.seed(60)
         index_sample_pca<-createDataPartition(label,p = min(1,10000/length(label)))$Resample1
-        set.seed(7)
+        set.seed(70)
         index_sample_pca1<-createDataPartition(label,p = min(1,10000/length(label)))$Resample1
     }
 
@@ -424,11 +424,11 @@ evaluate_hvg_continuous<-function(pcalist,pro,
     Num_method<-length(pcalist)
     Nosample<-FALSE
     if(ncol(pro)>10000){
-        set.seed(1)
+        set.seed(10)
         index_sample_pca<-sample(1:ncol(pro),size = 10000)
-        set.seed(2)
+        set.seed(20)
         index_sample_pca1<-sample(1:ncol(pro),size = 10000)
-        set.seed(3)
+        set.seed(30)
         index_sample_pca2<-sample(1:ncol(pro),size = 10000)
     }else{
         index_sample_pca<-1:ncol(pro)
@@ -460,7 +460,7 @@ evaluate_hvg_continuous<-function(pcalist,pro,
     knnratio<-rep(NA,Num_method)
 
     if(ncol(pro)>10000){
-        set.seed(4)
+        set.seed(40)
         index_sample_pca<-sample(1:ncol(pro),size = 10000)
     }
 
@@ -474,7 +474,7 @@ evaluate_hvg_continuous<-function(pcalist,pro,
     message("3nn")
     nn_mse<-rep(NA,Num_method)
     if(ncol(pro)>10000){
-        set.seed(5)
+        set.seed(50)
         index_sample_pca<-sample(1:ncol(pro),size = 10000)
     }
     for(i in 1:Num_method){
@@ -485,7 +485,7 @@ evaluate_hvg_continuous<-function(pcalist,pro,
     # Distance Correlation
     dist_cor<-rep(NA,Num_method)
     if(ncol(pro)>10000){
-        set.seed(4)
+        set.seed(60)
         index_sample_pca<-sample(1:ncol(pro),size = 10000)
     }
     pro_dist<-dist(t(pro[,index_sample_pca]))
