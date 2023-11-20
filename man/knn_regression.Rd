@@ -4,7 +4,7 @@
 \alias{knn_regression}
 \title{Criterion 2: Nearest Neighbor Mean Square Error}
 \usage{
-knn_regression(embedding, pro, k = 3, cutoff = 5000)
+knn_regression(embedding, pro, k = 3, cutoff = 10000)
 }
 \arguments{
 \item{embedding}{embedding}

@@ -333,7 +333,7 @@ within_between_var_ratio_continuous<-function(
 #' @export
 #'
 knn_regression<-function(embedding,pro,k=3,
-                         cutoff = 5000){
+                         cutoff = 10000){
     if (nrow(embedding) > cutoff){
         sample_index<-sample(1:nrow(embedding),size = cutoff)
     }else{
@@ -364,7 +364,7 @@ knn_regression<-function(embedding,pro,k=3,
 #' @export
 #'
 knn_ratio<-function(embedding,pro,k = 100,
-                    cutoff = 5000){
+                    cutoff = 10000){
     if (nrow(embedding) > cutoff){
         sample_index<-sample(1:nrow(embedding),size = cutoff)
     }else{
@@ -410,7 +410,7 @@ knn_ratio<-function(embedding,pro,k = 100,
 #'
 evaluate_hvg_continuous<-function(pcalist,pro,
                                input="MultiomeATAC",dataset_name=NULL){
-    if(is.null(dataset_name)){
+    if(!is.null(dataset_name)){
         cur_resolution=resolutionlist[[dataset_name]]
     }else{
         cur_resolution=0.2
