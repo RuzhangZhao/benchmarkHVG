@@ -333,7 +333,7 @@ within_between_var_ratio_continuous<-function(
 #' @export
 #'
 knn_regression<-function(embedding,pro,k=3,
-                         cutoff = 10000){
+                         cutoff = 5000){
     if (nrow(embedding) > cutoff){
         sample_index<-sample(1:nrow(embedding),size = cutoff)
     }else{
@@ -364,7 +364,7 @@ knn_regression<-function(embedding,pro,k=3,
 #' @export
 #'
 knn_ratio<-function(embedding,pro,k = 100,
-                    cutoff = 10000){
+                    cutoff = 5000){
     if (nrow(embedding) > cutoff){
         sample_index<-sample(1:nrow(embedding),size = cutoff)
     }else{
