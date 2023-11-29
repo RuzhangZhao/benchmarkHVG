@@ -25,3 +25,6 @@ var.seurat.obj:
 \description{
 mixture_hvg_pca
 }
+\details{
+mixture
+}

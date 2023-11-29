@@ -16,3 +16,6 @@ within_between_var_ratio_continuous(embedding, pro, resolution = 0.2)
 \description{
 Criterion 1: Variance Ratio
 }
+\details{
+1
+}

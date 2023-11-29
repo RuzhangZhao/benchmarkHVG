@@ -4,7 +4,7 @@
 
 #' hvg_pca
 #'
-#' @details
+#' @details hvg pca
 #'
 #' @param rna_mat input scRNA-seq count matrix
 #' @param nfeatures Number of features to select as top variable features.
@@ -438,7 +438,7 @@ hvg_pca<-function(rna_mat,
 
 #' mixture_hvg_pca
 #'
-#' @details
+#' @details mixture
 #'
 #' @param rna_mat input scRNA-seq count matrix
 #' @param nfeatures Number of features to select as top variable features.
@@ -494,7 +494,7 @@ mixture_hvg_pca<-function(rna_mat,
 
 #' mixture_hvg_pca0
 #'
-#' @details
+#' @details mixture
 #'
 #' @param rna_mat input scRNA-seq count matrix
 #' @param nfeatures Number of features to select as top variable features.

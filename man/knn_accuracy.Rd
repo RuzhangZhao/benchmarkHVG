@@ -16,3 +16,6 @@ knn_accuracy(embedding, cell_label, k = 3)
 \description{
 Criterion 3: Nearest Neighbor Accuracy
 }
+\details{
+3
+}

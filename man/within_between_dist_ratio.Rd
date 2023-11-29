@@ -14,3 +14,6 @@ within_between_dist_ratio(embedding, cell_label)
 \description{
 Criterion 4: Within VS Between Cell Type Distance Ratio
 }
+\details{
+4
+}

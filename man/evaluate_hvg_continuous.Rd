@@ -34,3 +34,6 @@ dist_cor
 Comprehensive Evaluation for CITEseq & MultiomeATAC
 Select input from "MultiomeATAC" or "CITEseq
 }
+\details{
+evaluate
+}

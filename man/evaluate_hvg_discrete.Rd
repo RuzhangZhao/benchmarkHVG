@@ -23,3 +23,6 @@ dist_ratio
 \description{
 Comprehensive Evaluation for cell sorting.
 }
+\details{
+evaluate
+}

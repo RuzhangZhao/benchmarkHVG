@@ -21,6 +21,9 @@ var.seurat.obj:
 \description{
 hvg_pca
 }
+\details{
+hvg pca
+}
 \examples{
 if(0){
 simple_matrix<-matrix(1:2e4,nrow=4000,ncol=5)

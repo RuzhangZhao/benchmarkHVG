@@ -18,3 +18,6 @@ knn_regression(embedding, pro, k = 3, cutoff = 5000)
 \description{
 Criterion 2: Nearest Neighbor Mean Square Error
 }
+\details{
+2
+}

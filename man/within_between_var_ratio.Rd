@@ -14,3 +14,6 @@ within_between_var_ratio(embedding, cell_label)
 \description{
 Criterion 2: Within VS Between Cell Type Variance Ratio
 }
+\details{
+2
+}

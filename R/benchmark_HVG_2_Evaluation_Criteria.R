@@ -2,7 +2,7 @@
 # Evaluate with cell sorting
 
 #' Criterion 1: ARI
-#' @details
+#' @details 1
 #'
 #' @param embedding embedding
 #' @param cell_label cell_label
@@ -78,7 +78,7 @@ ARILouvain<-function(
 }
 
 #' Criterion 2: Within VS Between Cell Type Variance Ratio
-#' @details
+#' @details 2
 #'
 #' @param embedding embedding
 #' @param cell_label cell_label
@@ -107,7 +107,7 @@ within_between_var_ratio<-function(embedding,cell_label){
 }
 
 #' Criterion 3: Nearest Neighbor Accuracy
-#' @details
+#' @details 3
 #'
 #' @param embedding embedding
 #' @param cell_label cell_label
@@ -139,7 +139,7 @@ knn_accuracy<-function(embedding,cell_label,k = 3){
 }
 
 #' Criterion 4: Within VS Between Cell Type Distance Ratio
-#' @details
+#' @details 4
 #'
 #' @importFrom stats dist
 #' @param embedding embedding
@@ -175,8 +175,47 @@ within_between_dist_ratio<-function(embedding,cell_label){
     pc_dist<-as.matrix(dist(embedding))
     sum(pc_dist*(1-label_dist))/sum(pc_dist*label_dist)
 }
+
+
+#' Criterion 5: LISI Score
+#' @details 5
+#'
+#' @importFrom lisi compute_lisi
+#' @param embedding embedding
+#' @param cell_label cell_label
+#'
+#'
+#' @return
+#'
+#' @export
+#'
+lisi_score_func<-function(embedding,cell_label){
+    lisi_score=compute_lisi(embedding,data.frame("cell_label"=cell_label),"cell_label")
+    mean(lisi_score)
+}
+
+#' Criterion 6: ASW
+#' @details 6
+#'
+#' @importFrom lisi compute_lisi
+#' @param embedding embedding
+#' @param cell_label cell_label
+#'
+#'
+#' @return
+#'
+#' @export
+#'
+asw_func_discrete<-function(
+        embedding,
+        cell_label){
+    dmat = dist(embedding)
+    silhouette_res<-silhouette(x=cell_label,dist=dmat)
+    mean(silhouette_res[,3])
+}
+
 #' Comprehensive Evaluation for cell sorting.
-#' @details
+#' @details evaluate
 #'
 #' @param pcalist pcalist
 #' @param label label
@@ -270,16 +309,53 @@ evaluate_hvg_discrete<-function(pcalist,label){
                      within_between_dist_ratio(pcalist[[i]][index_sample_pca1,],label[index_sample_pca1]))/2
         }
     }
+    lisi_score<-rep(NA,Num_method)
+    if(!Nosample){
+        set.seed(80)
+        index_sample_pca<-createDataPartition(label,p = min(1,10000/length(label)))$Resample1
+        set.seed(90)
+        index_sample_pca1<-createDataPartition(label,p = min(1,10000/length(label)))$Resample1
+    }
+
+    for(i in 1:Num_method){
+        if(Nosample){
+            lisi_score[i]<-lisi_score_func(pcalist[[i]],label)
+        }else{
+            lisi_score[i]<-
+                (lisi_score_func(pcalist[[i]][index_sample_pca,],label[index_sample_pca])+
+                     lisi_score_func(pcalist[[i]][index_sample_pca1,],label[index_sample_pca1]))/2
+        }
+    }
+
+    asw_score<-rep(NA,Num_method)
+    if(!Nosample){
+        set.seed(100)
+        index_sample_pca<-createDataPartition(label,p = min(1,5000/length(label)))$Resample1
+        set.seed(110)
+        index_sample_pca1<-createDataPartition(label,p = min(1,5000/length(label)))$Resample1
+    }
+    for(i in 1:Num_method){
+        if(Nosample){
+            asw_score[i]<-asw_func_discrete(pcalist[[i]],label)
+        }else{
+            asw_score[i]<-
+                (asw_func_discrete(pcalist[[i]][index_sample_pca,],label[index_sample_pca])+
+                     asw_func_discrete(pcalist[[i]][index_sample_pca1,],label[index_sample_pca1]))/2
+        }
+    }
+
     return(list(
             "var_ratio"=variance_ratio,
             "ari"=ari_list,
             "3nn"=nn_acc,
-            "dist_ratio"=dist_ratio))
+            "dist_ratio"=dist_ratio,
+            "lisi"=lisi_score,
+            "asw_score"=asw_score))
 }
 
 # Evaluate with CITEseq & MultiomeATAC
 #' Criterion 1: Variance Ratio
-#' @details
+#' @details 1
 #'
 #' @param embedding embedding
 #' @param pro pro
@@ -320,7 +396,7 @@ within_between_var_ratio_continuous<-function(
 }
 
 #' Criterion 2: Nearest Neighbor Mean Square Error
-#' @details
+#' @details 2
 #'
 #' @param embedding embedding
 #' @param pro pro
@@ -350,7 +426,7 @@ knn_regression<-function(embedding,pro,k=3,
 }
 
 #' Criterion 3: Nearest Neighbor Distance Ratio
-#' @details
+#' @details 3
 #'
 #' @param embedding embedding
 #' @param pro protein
@@ -389,10 +465,39 @@ knn_ratio<-function(embedding,pro,k = 100,
 # Criterion 4: Distance Correlation
 # just cor function
 
+#' Criterion 5: ASW
+#' @details 5
+#'
+#' @param embedding embedding
+#' @param dmat dmat
+#' @param resolution resolution
+#'
+#' @importFrom cluster silhouette
+#' @return
+#'
+#' @export
+#'
+library(cluster)
+asw_func<-function(
+        embedding,
+        dmat,
+        resolution = 0.2){
+
+    snn_<- FindNeighbors(object = embedding,
+                         nn.method = "rann",
+                         verbose = F)$snn
+    cluster_label <- FindClusters(snn_,
+                                  resolution = resolution,
+                                  verbose = F)[[1]]
+
+    cluster_label <- as.numeric(as.character(cluster_label))
+    silhouette_res<-silhouette(x=cluster_label,dist=dmat)
+    mean(silhouette_res[,3])
+}
 
 #' Comprehensive Evaluation for CITEseq & MultiomeATAC
 #' Select input from "MultiomeATAC" or "CITEseq
-#' @details
+#' @details evaluate
 #'
 #' @param pcalist pcalist
 #' @param pro protein
@@ -484,20 +589,30 @@ evaluate_hvg_continuous<-function(pcalist,pro,
     #################################################
     # Distance Correlation
     dist_cor<-rep(NA,Num_method)
-    if(ncol(pro)>10000){
+    # ASW
+    asw_score<-rep(NA,Num_method)
+    if(ncol(pro)>5000){
         set.seed(60)
-        index_sample_pca<-sample(1:ncol(pro),size = 10000)
+        index_sample_pca<-sample(1:ncol(pro),size = 5000)
+        set.seed(70)
+        index_sample_pca1<-sample(1:ncol(pro),size = 5000)
     }
     pro_dist<-dist(t(pro[,index_sample_pca]))
+    pro_dist1<-dist(t(pro[,index_sample_pca1]))
     for(i in 1:Num_method){
         pc_dist<-dist(pcalist[[i]][index_sample_pca,])
-        dist_cor[i]<-cor(c(pro_dist),c(pc_dist))
+        pc_dist1<-dist(pcalist[[i]][index_sample_pca1,])
+        dist_cor[i]<-(cor(c(pro_dist),c(pc_dist))+cor(c(pro_dist1),c(pc_dist1)))/2
+        asw_score[i]<-(asw_func(pcalist[[i]][index_sample_pca,],pro_dist,cur_resolution)+
+                           asw_func(pcalist[[i]][index_sample_pca1,],pro_dist1,cur_resolution))/2
     }
+
     newList<-list(
         "var_ratio"=variance_ratio,
         "knn_ratio"=knnratio,
         "3nn"=nn_mse,
-        "dist_cor"=dist_cor)
+        "dist_cor"=dist_cor,
+        "asw_score"=asw_score)
     return(newList)
 }
 

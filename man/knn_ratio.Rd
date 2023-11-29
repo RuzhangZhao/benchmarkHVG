@@ -18,3 +18,6 @@ knn_ratio(embedding, pro, k = 100, cutoff = 5000)
 \description{
 Criterion 3: Nearest Neighbor Distance Ratio
 }
+\details{
+3
+}
