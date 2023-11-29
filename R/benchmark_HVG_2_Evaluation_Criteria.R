@@ -1,7 +1,7 @@
 # Author: Ruzhang Zhao
 # Evaluate with cell sorting
 
-#' Criterion 1: ARI
+#' Criterion 1: ARI & NMI
 #' @details 1
 #'
 #' @param embedding embedding
@@ -18,7 +18,7 @@
 ARILouvain<-function(
         embedding,
         cell_label,
-        maxit = 25
+        maxit = 10
 ){
     N_label<-length(unique(cell_label))
     snn_<- FindNeighbors(object = embedding,
@@ -74,7 +74,9 @@ ARILouvain<-function(
         }
     }
     return(c(N_clusterc,
-             adjustedRandIndex(cluster_label,cell_label)))
+             adjustedRandIndex(cluster_label,cell_label),
+            NMI(cbind(1:length(cluster_label),cluster_label),cbind(1:length(cell_label),cell_label))$value
+             ))
 }
 
 #' Criterion 2: Within VS Between Cell Type Variance Ratio
@@ -256,20 +258,25 @@ evaluate_hvg_discrete<-function(pcalist,label){
 
     if(!Nosample){
         set.seed(30)
-        index_sample_pca<-createDataPartition(label,p = min(1,10000/length(label)))$Resample1
+        index_sample_pca<-createDataPartition(label,p = min(1,5000/length(label)))$Resample1
         set.seed(40)
-        index_sample_pca1<-createDataPartition(label,p = min(1,10000/length(label)))$Resample1
+        index_sample_pca1<-createDataPartition(label,p = min(1,5000/length(label)))$Resample1
     }
     #################################################
     # ARI with Louvain clustering  same number
     message("ari_louvain")
     ari_list<-rep(NA,Num_method)
+    nmi_list<-rep(NA,Num_method)
     for(i in 1:Num_method){
         if(Nosample){
-            ari_list[i]<-ARILouvain(pcalist[[i]],label)[2]
+            res_ari=ARILouvain(pcalist[[i]],label)
+            ari_list[i]<-res_ari[2]
+            nmi_list[i]<-res_ari[3]
         }else{
-            ari_list[i]<-(ARILouvain(pcalist[[i]][index_sample_pca,],label[index_sample_pca])[2]
-                          +ARILouvain(pcalist[[i]][index_sample_pca1,],label[index_sample_pca1])[2])/2
+            res_ari=ARILouvain(pcalist[[i]][index_sample_pca,],label[index_sample_pca])
+            res_ari1=ARILouvain(pcalist[[i]][index_sample_pca1,],label[index_sample_pca1])
+            ari_list[i]<-(res_ari[2]+res_ari1[2])/2
+            nmi_list[i]<-(res_ari[3]+res_ari1[3])/2
         }
     }
 
@@ -279,7 +286,7 @@ evaluate_hvg_discrete<-function(pcalist,label){
     nn_acc<-rep(NA,Num_method)
     if(!Nosample){
         set.seed(50)
-        index_sample_pca<-createDataPartition(label,p = min(1,10000/length(label)))$Resample1
+        index_sample_pca<-createDataPartition(label,p = min(1,5000/length(label)))$Resample1
     }
     for(i in 1:Num_method){
         if(Nosample){
@@ -295,9 +302,9 @@ evaluate_hvg_discrete<-function(pcalist,label){
 
     if(!Nosample){
         set.seed(60)
-        index_sample_pca<-createDataPartition(label,p = min(1,10000/length(label)))$Resample1
+        index_sample_pca<-createDataPartition(label,p = min(1,5000/length(label)))$Resample1
         set.seed(70)
-        index_sample_pca1<-createDataPartition(label,p = min(1,10000/length(label)))$Resample1
+        index_sample_pca1<-createDataPartition(label,p = min(1,5000/length(label)))$Resample1
     }
 
     for(i in 1:Num_method){
@@ -312,9 +319,9 @@ evaluate_hvg_discrete<-function(pcalist,label){
     lisi_score<-rep(NA,Num_method)
     if(!Nosample){
         set.seed(80)
-        index_sample_pca<-createDataPartition(label,p = min(1,10000/length(label)))$Resample1
+        index_sample_pca<-createDataPartition(label,p = min(1,5000/length(label)))$Resample1
         set.seed(90)
-        index_sample_pca1<-createDataPartition(label,p = min(1,10000/length(label)))$Resample1
+        index_sample_pca1<-createDataPartition(label,p = min(1,5000/length(label)))$Resample1
     }
 
     for(i in 1:Num_method){
@@ -350,7 +357,8 @@ evaluate_hvg_discrete<-function(pcalist,label){
             "3nn"=nn_acc,
             "dist_ratio"=dist_ratio,
             "lisi"=lisi_score,
-            "asw_score"=asw_score))
+            "asw_score"=asw_score,
+            "nmi"=nmi_list))
 }
 
 # Evaluate with CITEseq & MultiomeATAC
@@ -495,6 +503,41 @@ asw_func<-function(
     mean(silhouette_res[,3])
 }
 
+#' Criterion 6: NMI
+#' @details 6
+#'
+#' @param embedding embedding
+#' @param pro pro
+#'
+#' @importFrom NMI NMI
+#' @return
+#'
+#' @export
+#'
+nmi_func<-function(
+        embedding,
+        pro,
+        resolution = 0.2){
+
+    snn_<- FindNeighbors(object = embedding,
+                         nn.method = "rann",
+                         verbose = F)$snn
+    cluster_label <- FindClusters(snn_,
+                                  resolution = resolution,
+                                  verbose = F)[[1]]
+    cluster_label <- as.numeric(as.character(cluster_label))
+
+    snn_<- FindNeighbors(object = t(pro),
+                         nn.method = "rann",
+                         verbose = F)$snn
+    cluster_label_pro <- FindClusters(snn_,
+                                  resolution = resolution,
+                                  verbose = F)[[1]]
+    cluster_label_pro <- as.numeric(as.character(cluster_label_pro))
+    NMI(cbind(1:length(cluster_label),cluster_label),cbind(1:length(cluster_label_pro),cluster_label_pro))
+}
+
+
 #' Comprehensive Evaluation for CITEseq & MultiomeATAC
 #' Select input from "MultiomeATAC" or "CITEseq
 #' @details evaluate
@@ -564,9 +607,9 @@ evaluate_hvg_continuous<-function(pcalist,pro,
     message("knn_ratio")
     knnratio<-rep(NA,Num_method)
 
-    if(ncol(pro)>10000){
+    if(ncol(pro)>5000){
         set.seed(40)
-        index_sample_pca<-sample(1:ncol(pro),size = 10000)
+        index_sample_pca<-sample(1:ncol(pro),size = 5000)
     }
 
     for(i in 1:Num_method){
@@ -578,9 +621,9 @@ evaluate_hvg_continuous<-function(pcalist,pro,
     # 3NN Regression MSE
     message("3nn")
     nn_mse<-rep(NA,Num_method)
-    if(ncol(pro)>10000){
+    if(ncol(pro)>5000){
         set.seed(50)
-        index_sample_pca<-sample(1:ncol(pro),size = 10000)
+        index_sample_pca<-sample(1:ncol(pro),size = 5000)
     }
     for(i in 1:Num_method){
         nn_mse[i]<-knn_regression(pcalist[[i]][index_sample_pca,],pro[,index_sample_pca])
@@ -607,12 +650,28 @@ evaluate_hvg_continuous<-function(pcalist,pro,
                            asw_func(pcalist[[i]][index_sample_pca1,],pro_dist1,cur_resolution))/2
     }
 
+    #######################################
+    ## NMI
+    nmi_list<-rep(NA,Num_method)
+    if(ncol(pro)>5000){
+        set.seed(80)
+        index_sample_pca<-sample(1:ncol(pro),size = 5000)
+        set.seed(90)
+        index_sample_pca1<-sample(1:ncol(pro),size = 5000)
+    }
+    for(i in 1:Num_method){
+        nmi_list[i]<-(nmi_func(pcalist[[i]][index_sample_pca,],pro_dist,cur_resolution)+
+                          nmi_func(pcalist[[i]][index_sample_pca1,],pro_dist1,cur_resolution))/2
+    }
+
+
     newList<-list(
         "var_ratio"=variance_ratio,
         "knn_ratio"=knnratio,
         "3nn"=nn_mse,
         "dist_cor"=dist_cor,
-        "asw_score"=asw_score)
+        "asw_score"=asw_score,
+        "nmi"=nmi_list)
     return(newList)
 }
 
