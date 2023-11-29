@@ -191,7 +191,7 @@ within_between_dist_ratio<-function(embedding,cell_label){
 #'
 lisi_score_func<-function(embedding,cell_label){
     lisi_score=compute_lisi(embedding,data.frame("cell_label"=cell_label),"cell_label")
-    mean(lisi_score)
+    mean(lisi_score$cell_label)
 }
 
 #' Criterion 6: ASW
