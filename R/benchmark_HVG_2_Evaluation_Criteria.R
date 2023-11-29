@@ -210,7 +210,7 @@ asw_func_discrete<-function(
         embedding,
         cell_label){
     dmat = dist(embedding)
-    silhouette_res<-silhouette(x=cell_label,dist=dmat)
+    silhouette_res<-silhouette(x=as.numeric(as.factor(cell_label)),dist=dmat)
     mean(silhouette_res[,3])
 }
 
