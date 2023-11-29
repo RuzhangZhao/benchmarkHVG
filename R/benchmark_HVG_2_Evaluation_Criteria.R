@@ -13,6 +13,7 @@
 #'
 #' @import Seurat
 #' @importFrom mclust adjustedRandIndex
+#' @importFrom NMI NMI
 #' @export
 #'
 ARILouvain<-function(
@@ -199,7 +200,8 @@ lisi_score_func<-function(embedding,cell_label){
 #' Criterion 6: ASW
 #' @details 6
 #'
-#' @importFrom lisi compute_lisi
+#' @importFrom cluster silhouette
+#' @importFrom stats dist
 #' @param embedding embedding
 #' @param cell_label cell_label
 #'
@@ -508,6 +510,7 @@ asw_func<-function(
 #'
 #' @param embedding embedding
 #' @param pro pro
+#' @param resolution resolution
 #'
 #' @importFrom NMI NMI
 #' @return
@@ -660,8 +663,8 @@ evaluate_hvg_continuous<-function(pcalist,pro,
         index_sample_pca1<-sample(1:ncol(pro),size = 5000)
     }
     for(i in 1:Num_method){
-        nmi_list[i]<-(nmi_func(pcalist[[i]][index_sample_pca,],pro_dist,cur_resolution)+
-                          nmi_func(pcalist[[i]][index_sample_pca1,],pro_dist1,cur_resolution))/2
+        nmi_list[i]<-(nmi_func(pcalist[[i]][index_sample_pca,],pro[,index_sample_pca],cur_resolution)+
+                          nmi_func(pcalist[[i]][index_sample_pca1,],pro[,index_sample_pca1],cur_resolution))/2
     }
 
 
