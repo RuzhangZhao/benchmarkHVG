@@ -664,13 +664,13 @@ evaluate_hvg_continuous<-function(pcalist,pro,
     }
     Num_method<-length(pcalist)
     Nosample<-FALSE
-    if(ncol(pro)>10000){
+    if(ncol(pro)>5000){
         set.seed(10)
-        index_sample_pca<-sample(1:ncol(pro),size = 10000)
+        index_sample_pca<-sample(1:ncol(pro),size = 5000)
         set.seed(20)
-        index_sample_pca1<-sample(1:ncol(pro),size = 10000)
+        index_sample_pca1<-sample(1:ncol(pro),size = 5000)
         set.seed(30)
-        index_sample_pca2<-sample(1:ncol(pro),size = 10000)
+        index_sample_pca2<-sample(1:ncol(pro),size = 5000)
     }else{
         index_sample_pca<-1:ncol(pro)
         Nosample<-TRUE
@@ -700,7 +700,7 @@ evaluate_hvg_continuous<-function(pcalist,pro,
     message("knn_ratio")
     knnratio<-rep(NA,Num_method)
 
-    if(ncol(pro)>5000){
+    if(!Nosample){
         set.seed(40)
         index_sample_pca<-sample(1:ncol(pro),size = 5000)
     }
@@ -714,7 +714,7 @@ evaluate_hvg_continuous<-function(pcalist,pro,
     # 3NN Regression MSE
     message("3nn")
     nn_mse<-rep(NA,Num_method)
-    if(ncol(pro)>5000){
+    if(!Nosample){
         set.seed(50)
         index_sample_pca<-sample(1:ncol(pro),size = 5000)
     }
@@ -724,10 +724,11 @@ evaluate_hvg_continuous<-function(pcalist,pro,
 
     #################################################
     # Distance Correlation
+    message("dist cor")
     dist_cor<-rep(NA,Num_method)
     # ASW
     asw_score<-rep(NA,Num_method)
-    if(ncol(pro)>5000){
+    if(!Nosample){
         set.seed(60)
         index_sample_pca<-sample(1:ncol(pro),size = 5000)
         set.seed(70)
@@ -755,10 +756,11 @@ evaluate_hvg_continuous<-function(pcalist,pro,
 
     #######################################
     ## ARI,NMI,F1
+    message("ari,nmi,f1")
     ari_list<-rep(NA,Num_method)
     nmi_list<-rep(NA,Num_method)
     f1_list<-rep(NA,Num_method)
-    if(ncol(pro)>5000){
+    if(!Nosample){
         set.seed(80)
         index_sample_pca<-sample(1:ncol(pro),size = 5000)
         set.seed(90)
@@ -785,10 +787,11 @@ evaluate_hvg_continuous<-function(pcalist,pro,
 
     #######################################
     ## max ARI,NMI,F1
+    message("maxari,maxnmi,maxf1")
     max_ari_list<-rep(NA,Num_method)
     max_nmi_list<-rep(NA,Num_method)
     max_f1_list<-rep(NA,Num_method)
-    if(ncol(pro)>5000){
+    if(!Nosample){
         set.seed(80)
         index_sample_pca<-sample(1:ncol(pro),size = 5000)
         set.seed(90)
