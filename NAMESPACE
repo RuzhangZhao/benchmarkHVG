@@ -2,6 +2,7 @@
 
 export()
 export(ARI_NMI_F1_func)
+export(ARI_NMI_F1_func_Max_continuous)
 export(ARI_NMI_F1_func_continuous)
 export(asw_func)
 export(evaluate_hvg_continuous)

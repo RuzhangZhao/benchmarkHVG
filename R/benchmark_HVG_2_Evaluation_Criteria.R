@@ -23,6 +23,7 @@ ARI_NMI_F1_func<-function(
         maxit = 10
 ){
     N_label<-length(unique(cell_label))
+    cell_label = as.numeric(as.factor(cell_label))
     snn_<- FindNeighbors(object = embedding,
                          nn.method = "rann",
                          verbose = F)$snn
@@ -32,8 +33,11 @@ ARI_NMI_F1_func<-function(
     N_cluster0<-length(unique(cluster_label))
     if(N_cluster0>=N_label){
         print("Resolution 0 still larger than true")
-        return(c(N_cluster0,
-                 adjustedRandIndex(cluster_label,cell_label)))
+        return(c(N_clusterc,
+                 adjustedRandIndex(cluster_label,cell_label),
+                 NMI(cbind(1:length(cluster_label),cluster_label),cbind(1:length(cell_label),cell_label))$value,
+                 f1(cluster_label,cell_label)
+        ))
     }
 
     cluster_label <- FindClusters(snn_,
@@ -41,8 +45,11 @@ ARI_NMI_F1_func<-function(
                                   verbose = F)[[1]]
     N_cluster1<-length(unique(cluster_label))
     if(N_cluster1 <= N_label ){
-        return(c(N_cluster1,
-                 adjustedRandIndex(cluster_label,cell_label)))
+        return(c(N_clusterc,
+                 adjustedRandIndex(cluster_label,cell_label),
+                 NMI(cbind(1:length(cluster_label),cluster_label),cbind(1:length(cell_label),cell_label))$value,
+                 f1(cluster_label,cell_label)
+        ))
     }else if (N_cluster1 > N_label){
         a<-0
         b<-1
@@ -58,7 +65,10 @@ ARI_NMI_F1_func<-function(
         if( N_clusterc == N_label){
             keepsign<-FALSE
             return(c(N_clusterc,
-                     adjustedRandIndex(cluster_label,cell_label)))
+                     adjustedRandIndex(cluster_label,cell_label),
+                     NMI(cbind(1:length(cluster_label),cluster_label),cbind(1:length(cell_label),cell_label))$value,
+                     f1(cluster_label,cell_label)
+            ))
         }else if (N_clusterc < N_label){
             a<-c
         }else{
@@ -81,13 +91,13 @@ ARI_NMI_F1_func_Max<-function(
         embedding,
         cell_label
 ){
-    N_label<-length(unique(cell_label))
+    cell_label = as.numeric(as.factor(cell_label))
     snn_<- FindNeighbors(object = embedding,
                          nn.method = "rann",
                          verbose = F)$snn
     res<-sapply(seq(0.1,2,0.1),function(cur_resolution){
         cluster_label <- FindClusters(snn_,
-                                      resolution = 0,
+                                      resolution = cur_resolution,
                                       verbose = F)[[1]]
         c(adjustedRandIndex(cluster_label,cell_label),
         NMI(cbind(1:length(cluster_label),cluster_label),cbind(1:length(cell_label),cell_label))$value,
@@ -211,7 +221,7 @@ within_between_dist_ratio<-function(embedding,cell_label){
 #'
 lisi_score_func<-function(embedding,cell_label){
     lisi_score=compute_lisi(embedding,data.frame("cell_label"=cell_label),"cell_label")
-    median(lisi_score$cell_label)
+    mean(lisi_score$cell_label)
 }
 
 #' Criterion 6: ASW
@@ -279,9 +289,9 @@ evaluate_hvg_discrete<-function(pcalist,label){
 
     if(!Nosample){
         set.seed(30)
-        index_sample_pca<-createDataPartition(label,p = min(1,5000/length(label)))$Resample1
+        index_sample_pca<-createDataPartition(label,p = min(1,10000/length(label)))$Resample1
         set.seed(40)
-        index_sample_pca1<-createDataPartition(label,p = min(1,5000/length(label)))$Resample1
+        index_sample_pca1<-createDataPartition(label,p = min(1,10000/length(label)))$Resample1
     }
     #################################################
     # ARI with Louvain clustering with the closest cell type number
@@ -332,7 +342,7 @@ evaluate_hvg_discrete<-function(pcalist,label){
     nn_acc<-rep(NA,Num_method)
     if(!Nosample){
         set.seed(50)
-        index_sample_pca<-createDataPartition(label,p = min(1,5000/length(label)))$Resample1
+        index_sample_pca<-createDataPartition(label,p = min(1,10000/length(label)))$Resample1
     }
     for(i in 1:Num_method){
         if(Nosample){
@@ -348,9 +358,9 @@ evaluate_hvg_discrete<-function(pcalist,label){
 
     if(!Nosample){
         set.seed(60)
-        index_sample_pca<-createDataPartition(label,p = min(1,5000/length(label)))$Resample1
+        index_sample_pca<-createDataPartition(label,p = min(1,10000/length(label)))$Resample1
         set.seed(70)
-        index_sample_pca1<-createDataPartition(label,p = min(1,5000/length(label)))$Resample1
+        index_sample_pca1<-createDataPartition(label,p = min(1,10000/length(label)))$Resample1
     }
 
     for(i in 1:Num_method){
@@ -365,9 +375,9 @@ evaluate_hvg_discrete<-function(pcalist,label){
     lisi_score<-rep(NA,Num_method)
     if(!Nosample){
         set.seed(80)
-        index_sample_pca<-createDataPartition(label,p = min(1,5000/length(label)))$Resample1
+        index_sample_pca<-createDataPartition(label,p = min(1,10000/length(label)))$Resample1
         set.seed(90)
-        index_sample_pca1<-createDataPartition(label,p = min(1,5000/length(label)))$Resample1
+        index_sample_pca1<-createDataPartition(label,p = min(1,10000/length(label)))$Resample1
     }
 
     for(i in 1:Num_method){
@@ -383,9 +393,9 @@ evaluate_hvg_discrete<-function(pcalist,label){
     asw_score<-rep(NA,Num_method)
     if(!Nosample){
         set.seed(100)
-        index_sample_pca<-createDataPartition(label,p = min(1,5000/length(label)))$Resample1
+        index_sample_pca<-createDataPartition(label,p = min(1,10000/length(label)))$Resample1
         set.seed(110)
-        index_sample_pca1<-createDataPartition(label,p = min(1,5000/length(label)))$Resample1
+        index_sample_pca1<-createDataPartition(label,p = min(1,10000/length(label)))$Resample1
     }
     for(i in 1:Num_method){
         if(Nosample){
@@ -469,7 +479,7 @@ within_between_var_ratio_continuous<-function(
 #' @export
 #'
 knn_regression_continuous<-function(embedding,pro,k=3,
-                         cutoff = 5000){
+                         cutoff = 10000){
     if (nrow(embedding) > cutoff){
         sample_index<-sample(1:nrow(embedding),size = cutoff)
     }else{
@@ -500,7 +510,7 @@ knn_regression_continuous<-function(embedding,pro,k=3,
 #' @export
 #'
 knn_ratio_continuous<-function(embedding,pro,k = 100,
-                    cutoff = 5000){
+                    cutoff = 10000){
     if (nrow(embedding) > cutoff){
         sample_index<-sample(1:nrow(embedding),size = cutoff)
     }else{
@@ -555,6 +565,25 @@ asw_func_continuous<-function(
     mean(silhouette_res[,3])
 }
 
+asw_max_func_continuous<-function(
+    embedding,
+    dmat){
+
+  snn_<- FindNeighbors(object = embedding,
+                       nn.method = "rann",
+                       verbose = F)$snn
+
+  res_<-sapply(seq(0.1,2,0.1), function(cur_resolution){
+    cluster_label <- FindClusters(snn_,
+                                  resolution = cur_resolution,
+                                  verbose = F)[[1]]
+    cluster_label <- as.numeric(as.character(cluster_label))
+    silhouette_res<-silhouette(x=cluster_label,dist=dmat)
+    mean(silhouette_res[,3])
+  })
+  max(res_)
+}
+
 #' Criterion 6: NMI
 #' @details 6
 #'
@@ -594,6 +623,21 @@ ARI_NMI_F1_func_continuous<-function(
       f1(cluster_label_pro,cluster_label))
 }
 
+#' Criterion 6: NMI
+#' @details 6
+#'
+#' @param embedding embedding
+#' @param pro pro
+#' @param resolution resolution
+#'
+#' @importFrom mclust adjustedRandIndex
+#' @importFrom NMI NMI
+#' @importFrom Metrics f1
+#' @importFrom cluster silhouette
+#' @return
+#'
+#' @export
+#'
 
 ARI_NMI_F1_func_Max_continuous<-function(
         embedding,
@@ -664,13 +708,13 @@ evaluate_hvg_continuous<-function(pcalist,pro,
     }
     Num_method<-length(pcalist)
     Nosample<-FALSE
-    if(ncol(pro)>5000){
+    if(ncol(pro)>10000){
         set.seed(10)
-        index_sample_pca<-sample(1:ncol(pro),size = 5000)
+        index_sample_pca<-sample(1:ncol(pro),size = 10000)
         set.seed(20)
-        index_sample_pca1<-sample(1:ncol(pro),size = 5000)
+        index_sample_pca1<-sample(1:ncol(pro),size = 10000)
         set.seed(30)
-        index_sample_pca2<-sample(1:ncol(pro),size = 5000)
+        index_sample_pca2<-sample(1:ncol(pro),size = 10000)
     }else{
         index_sample_pca<-1:ncol(pro)
         Nosample<-TRUE
@@ -702,7 +746,7 @@ evaluate_hvg_continuous<-function(pcalist,pro,
 
     if(!Nosample){
         set.seed(40)
-        index_sample_pca<-sample(1:ncol(pro),size = 5000)
+        index_sample_pca<-sample(1:ncol(pro),size = 10000)
     }
 
     for(i in 1:Num_method){
@@ -716,7 +760,7 @@ evaluate_hvg_continuous<-function(pcalist,pro,
     nn_mse<-rep(NA,Num_method)
     if(!Nosample){
         set.seed(50)
-        index_sample_pca<-sample(1:ncol(pro),size = 5000)
+        index_sample_pca<-sample(1:ncol(pro),size = 10000)
     }
     for(i in 1:Num_method){
         nn_mse[i]<-knn_regression_continuous(pcalist[[i]][index_sample_pca,],pro[,index_sample_pca])
@@ -728,11 +772,12 @@ evaluate_hvg_continuous<-function(pcalist,pro,
     dist_cor<-rep(NA,Num_method)
     # ASW
     asw_score<-rep(NA,Num_method)
+    max_asw_score<-rep(NA,Num_method)
     if(!Nosample){
         set.seed(60)
-        index_sample_pca<-sample(1:ncol(pro),size = 5000)
+        index_sample_pca<-sample(1:ncol(pro),size = 10000)
         set.seed(70)
-        index_sample_pca1<-sample(1:ncol(pro),size = 5000)
+        index_sample_pca1<-sample(1:ncol(pro),size = 10000)
     }
 
     if(Nosample){
@@ -741,6 +786,7 @@ evaluate_hvg_continuous<-function(pcalist,pro,
             pc_dist<-dist(pcalist[[i]][index_sample_pca,])
             dist_cor[i]<-cor(c(pro_dist),c(pc_dist))
             asw_score[i]<-asw_func_continuous(pcalist[[i]],pro_dist,cur_resolution)
+            max_asw_score[i]<-asw_max_func_continuous(pcalist[[i]],pro_dist,cur_resolution)
         }
     }else{
         pro_dist<-dist(t(pro[,index_sample_pca]))
@@ -751,6 +797,8 @@ evaluate_hvg_continuous<-function(pcalist,pro,
             dist_cor[i]<-(cor(c(pro_dist),c(pc_dist))+cor(c(pro_dist1),c(pc_dist1)))/2
             asw_score[i]<-(asw_func_continuous(pcalist[[i]][index_sample_pca,],pro_dist,cur_resolution)+
                                asw_func_continuous(pcalist[[i]][index_sample_pca1,],pro_dist1,cur_resolution))/2
+            max_asw_score[i]<-(asw_max_func_continuous(pcalist[[i]][index_sample_pca,],pro_dist,cur_resolution)+
+                             asw_max_func_continuous(pcalist[[i]][index_sample_pca1,],pro_dist1,cur_resolution))/2
         }
     }
 
@@ -762,9 +810,9 @@ evaluate_hvg_continuous<-function(pcalist,pro,
     f1_list<-rep(NA,Num_method)
     if(!Nosample){
         set.seed(80)
-        index_sample_pca<-sample(1:ncol(pro),size = 5000)
+        index_sample_pca<-sample(1:ncol(pro),size = 10000)
         set.seed(90)
-        index_sample_pca1<-sample(1:ncol(pro),size = 5000)
+        index_sample_pca1<-sample(1:ncol(pro),size = 10000)
     }
     if(Nosample){
         for(i in 1:Num_method){
@@ -793,9 +841,9 @@ evaluate_hvg_continuous<-function(pcalist,pro,
     max_f1_list<-rep(NA,Num_method)
     if(!Nosample){
         set.seed(80)
-        index_sample_pca<-sample(1:ncol(pro),size = 5000)
+        index_sample_pca<-sample(1:ncol(pro),size = 10000)
         set.seed(90)
-        index_sample_pca1<-sample(1:ncol(pro),size = 5000)
+        index_sample_pca1<-sample(1:ncol(pro),size = 10000)
     }
     if(Nosample){
         for(i in 1:Num_method){
@@ -825,6 +873,7 @@ evaluate_hvg_continuous<-function(pcalist,pro,
         "ari"=ari_list,
         "nmi"=nmi_list,
         "f1"=f1_list,
+        "max_asw"=max_asw_score,
         "max_ari"=max_ari_list,
         "max_nmi"=max_nmi_list,
         "max_f1"=max_f1_list)
