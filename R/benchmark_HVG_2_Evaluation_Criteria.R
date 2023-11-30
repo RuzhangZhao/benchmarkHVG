@@ -1,12 +1,12 @@
 # Author: Ruzhang Zhao
 # Evaluate with cell sorting
 
-#' Criterion 1: ARI & NMI
+#' Criterion 1: ARI & NMI & F1 with closest cell type number
 #' @details 1
 #'
 #' @param embedding embedding
 #' @param cell_label cell_label
-#' @param maxit maxit
+#' @param maxit max iteration
 #'
 #'
 #' @return
@@ -14,9 +14,10 @@
 #' @import Seurat
 #' @importFrom mclust adjustedRandIndex
 #' @importFrom NMI NMI
+#' @importFrom Metrics f1
 #' @export
 #'
-ARILouvain<-function(
+ARI_NMI_F1_func<-function(
         embedding,
         cell_label,
         maxit = 10
@@ -35,9 +36,6 @@ ARILouvain<-function(
                  adjustedRandIndex(cluster_label,cell_label)))
     }
 
-    snn_<- FindNeighbors(object = embedding,
-                         nn.method = "rann",
-                         verbose = F)$snn
     cluster_label <- FindClusters(snn_,
                                   resolution = 1,
                                   verbose = F)[[1]]
@@ -53,9 +51,6 @@ ARILouvain<-function(
     iter_<-0
     while (keepsign) {
         c<-(a+b)/2
-        snn_<- FindNeighbors(object = embedding,
-                             nn.method = "rann",
-                             verbose = F)$snn
         cluster_label <- FindClusters(snn_,
                                       resolution = c,
                                       verbose = F)[[1]]
@@ -76,8 +71,29 @@ ARILouvain<-function(
     }
     return(c(N_clusterc,
              adjustedRandIndex(cluster_label,cell_label),
-            NMI(cbind(1:length(cluster_label),cluster_label),cbind(1:length(cell_label),cell_label))$value
+            NMI(cbind(1:length(cluster_label),cluster_label),cbind(1:length(cell_label),cell_label))$value,
+            f1(cluster_label,cell_label)
              ))
+}
+
+
+ARI_NMI_F1_func_Max<-function(
+        embedding,
+        cell_label
+){
+    N_label<-length(unique(cell_label))
+    snn_<- FindNeighbors(object = embedding,
+                         nn.method = "rann",
+                         verbose = F)$snn
+    res<-sapply(seq(0.1,2,0.1),function(cur_resolution){
+        cluster_label <- FindClusters(snn_,
+                                      resolution = 0,
+                                      verbose = F)[[1]]
+        c(adjustedRandIndex(cluster_label,cell_label),
+        NMI(cbind(1:length(cluster_label),cluster_label),cbind(1:length(cell_label),cell_label))$value,
+        f1(cluster_label,cell_label))
+    })
+    c(max(res[1,]),max(res[2,]),max(res[3,]))
 }
 
 #' Criterion 2: Within VS Between Cell Type Variance Ratio
@@ -184,6 +200,7 @@ within_between_dist_ratio<-function(embedding,cell_label){
 #' @details 5
 #'
 #' @importFrom lisi compute_lisi
+#' @importFrom stats median
 #' @param embedding embedding
 #' @param cell_label cell_label
 #'
@@ -194,7 +211,7 @@ within_between_dist_ratio<-function(embedding,cell_label){
 #'
 lisi_score_func<-function(embedding,cell_label){
     lisi_score=compute_lisi(embedding,data.frame("cell_label"=cell_label),"cell_label")
-    mean(lisi_score$cell_label)
+    median(lisi_score$cell_label)
 }
 
 #' Criterion 6: ASW
@@ -210,13 +227,15 @@ lisi_score_func<-function(embedding,cell_label){
 #'
 #' @export
 #'
-asw_func_discrete<-function(
+asw_func<-function(
         embedding,
         cell_label){
     dmat = dist(embedding)
     silhouette_res<-silhouette(x=as.numeric(as.factor(cell_label)),dist=dmat)
     mean(silhouette_res[,3])
 }
+
+
 
 #' Comprehensive Evaluation for cell sorting.
 #' @details evaluate
@@ -265,22 +284,47 @@ evaluate_hvg_discrete<-function(pcalist,label){
         index_sample_pca1<-createDataPartition(label,p = min(1,5000/length(label)))$Resample1
     }
     #################################################
-    # ARI with Louvain clustering  same number
-    message("ari_louvain")
+    # ARI with Louvain clustering with the closest cell type number
+    message("ari_nmi_louvain")
     ari_list<-rep(NA,Num_method)
     nmi_list<-rep(NA,Num_method)
+    f1_list<-rep(NA,Num_method)
     for(i in 1:Num_method){
         if(Nosample){
-            res_ari=ARILouvain(pcalist[[i]],label)
+            res_ari=ARI_NMI_F1_func(pcalist[[i]],label)
             ari_list[i]<-res_ari[2]
             nmi_list[i]<-res_ari[3]
+            f1_list[i]<-res_ari[4]
         }else{
-            res_ari=ARILouvain(pcalist[[i]][index_sample_pca,],label[index_sample_pca])
-            res_ari1=ARILouvain(pcalist[[i]][index_sample_pca1,],label[index_sample_pca1])
+            res_ari=ARI_NMI_F1_func(pcalist[[i]][index_sample_pca,],label[index_sample_pca])
+            res_ari1=ARI_NMI_F1_func(pcalist[[i]][index_sample_pca1,],label[index_sample_pca1])
             ari_list[i]<-(res_ari[2]+res_ari1[2])/2
             nmi_list[i]<-(res_ari[3]+res_ari1[3])/2
+            f1_list[i]<-(res_ari[4]+res_ari1[4])/2
         }
     }
+
+    #################################################
+    # ARI with Louvain clustering with the best number
+    message("ari_nmi_max")
+    max_ari_list<-rep(NA,Num_method)
+    max_nmi_list<-rep(NA,Num_method)
+    max_f1_list<-rep(NA,Num_method)
+    for(i in 1:Num_method){
+        if(Nosample){
+            res_ari=ARI_NMI_F1_func_Max(pcalist[[i]],label)
+            max_ari_list[i]<-res_ari[1]
+            max_nmi_list[i]<-res_ari[2]
+            max_f1_list[i]<-res_ari[3]
+        }else{
+            res_ari=ARI_NMI_F1_func_Max(pcalist[[i]][index_sample_pca,],label[index_sample_pca])
+            res_ari1=ARI_NMI_F1_func_Max(pcalist[[i]][index_sample_pca1,],label[index_sample_pca1])
+            max_ari_list[i]<-(res_ari[1]+res_ari1[1])/2
+            max_nmi_list[i]<-(res_ari[2]+res_ari1[2])/2
+            max_f1_list[i]<-(res_ari[3]+res_ari1[3])/2
+        }
+    }
+
 
     #################################################
     # 3NN accuracy
@@ -345,13 +389,14 @@ evaluate_hvg_discrete<-function(pcalist,label){
     }
     for(i in 1:Num_method){
         if(Nosample){
-            asw_score[i]<-asw_func_discrete(pcalist[[i]],label)
+            asw_score[i]<-asw_func(pcalist[[i]],label)
         }else{
             asw_score[i]<-
-                (asw_func_discrete(pcalist[[i]][index_sample_pca,],label[index_sample_pca])+
-                     asw_func_discrete(pcalist[[i]][index_sample_pca1,],label[index_sample_pca1]))/2
+                (asw_func(pcalist[[i]][index_sample_pca,],label[index_sample_pca])+
+                     asw_func(pcalist[[i]][index_sample_pca1,],label[index_sample_pca1]))/2
         }
     }
+
 
     return(list(
             "var_ratio"=variance_ratio,
@@ -360,7 +405,12 @@ evaluate_hvg_discrete<-function(pcalist,label){
             "dist_ratio"=dist_ratio,
             "lisi"=lisi_score,
             "asw_score"=asw_score,
-            "nmi"=nmi_list))
+            "ari"=ari_list,
+            "nmi"=nmi_list,
+            "f1"=f1_list,
+            "max_ari"=max_ari_list,
+            "max_nmi"=max_nmi_list,
+            "max_f1"=max_f1_list))
 }
 
 # Evaluate with CITEseq & MultiomeATAC
@@ -418,7 +468,7 @@ within_between_var_ratio_continuous<-function(
 #'
 #' @export
 #'
-knn_regression<-function(embedding,pro,k=3,
+knn_regression_continuous<-function(embedding,pro,k=3,
                          cutoff = 5000){
     if (nrow(embedding) > cutoff){
         sample_index<-sample(1:nrow(embedding),size = cutoff)
@@ -449,7 +499,7 @@ knn_regression<-function(embedding,pro,k=3,
 #'
 #' @export
 #'
-knn_ratio<-function(embedding,pro,k = 100,
+knn_ratio_continuous<-function(embedding,pro,k = 100,
                     cutoff = 5000){
     if (nrow(embedding) > cutoff){
         sample_index<-sample(1:nrow(embedding),size = cutoff)
@@ -488,7 +538,7 @@ knn_ratio<-function(embedding,pro,k = 100,
 #' @export
 #'
 library(cluster)
-asw_func<-function(
+asw_func_continuous<-function(
         embedding,
         dmat,
         resolution = 0.2){
@@ -512,12 +562,14 @@ asw_func<-function(
 #' @param pro pro
 #' @param resolution resolution
 #'
+#' @importFrom mclust adjustedRandIndex
 #' @importFrom NMI NMI
+#' @importFrom Metrics f1
 #' @return
 #'
 #' @export
 #'
-nmi_func<-function(
+ARI_NMI_F1_func_continuous<-function(
         embedding,
         pro,
         resolution = 0.2){
@@ -530,16 +582,54 @@ nmi_func<-function(
                                   verbose = F)[[1]]
     cluster_label <- as.numeric(as.character(cluster_label))
 
-    snn_<- FindNeighbors(object = t(pro),
+    snn_pro<- FindNeighbors(object = t(pro),
                          nn.method = "rann",
                          verbose = F)$snn
-    cluster_label_pro <- FindClusters(snn_,
+    cluster_label_pro <- FindClusters(snn_pro,
                                   resolution = resolution,
                                   verbose = F)[[1]]
     cluster_label_pro <- as.numeric(as.character(cluster_label_pro))
-    NMI(cbind(1:length(cluster_label),cluster_label),cbind(1:length(cluster_label_pro),cluster_label_pro))
+    c(adjustedRandIndex(cluster_label,cluster_label_pro),
+        NMI(cbind(1:length(cluster_label),cluster_label),cbind(1:length(cluster_label_pro),cluster_label_pro)),
+      f1(cluster_label_pro,cluster_label))
 }
 
+
+ARI_NMI_F1_func_Max_continuous<-function(
+        embedding,
+        pro){
+
+    snn_<- FindNeighbors(object = embedding,
+                         nn.method = "rann",
+                         verbose = F)$snn
+    snn_pro<- FindNeighbors(object = t(pro),
+                            nn.method = "rann",
+                            verbose = F)$snn
+    cluster_label<-sapply(seq(0.1,2,0.1), function(cur_resolution){
+        cluster_label <- FindClusters(snn_,
+                                      resolution = cur_resolution,
+                                      verbose = F)[[1]]
+        as.numeric(as.character(cluster_label))
+    })
+
+    cluster_label_pro<-sapply(seq(0.1,2,0.1), function(cur_resolution){
+        cluster_label_pro <- FindClusters(snn_pro,
+                                      resolution = cur_resolution,
+                                      verbose = F)[[1]]
+        as.numeric(as.character(cluster_label_pro))
+    })
+
+
+c(    max(sapply(1:20, function(i){sapply(1:20, function(j){
+        adjustedRandIndex(cluster_label[,i],cluster_label_pro[,j])})})),
+    max(sapply(1:20, function(i){sapply(1:20, function(j){
+NMI(cbind(1:length(cluster_label[,i]),cluster_label[,i]),cbind(1:length(cluster_label_pro[,j]),cluster_label_pro[,j]))
+        })})),
+max(sapply(1:20, function(i){sapply(1:20, function(j){
+    f1(cluster_label_pro[,j],cluster_label[,i])})}))
+)
+
+}
 
 #' Comprehensive Evaluation for CITEseq & MultiomeATAC
 #' Select input from "MultiomeATAC" or "CITEseq
@@ -616,7 +706,7 @@ evaluate_hvg_continuous<-function(pcalist,pro,
     }
 
     for(i in 1:Num_method){
-        knnratio[i]<-knn_ratio(pcalist[[i]][index_sample_pca,],pro[,index_sample_pca])
+        knnratio[i]<-knn_ratio_continuous(pcalist[[i]][index_sample_pca,],pro[,index_sample_pca])
     }
 
 
@@ -629,7 +719,7 @@ evaluate_hvg_continuous<-function(pcalist,pro,
         index_sample_pca<-sample(1:ncol(pro),size = 5000)
     }
     for(i in 1:Num_method){
-        nn_mse[i]<-knn_regression(pcalist[[i]][index_sample_pca,],pro[,index_sample_pca])
+        nn_mse[i]<-knn_regression_continuous(pcalist[[i]][index_sample_pca,],pro[,index_sample_pca])
     }
 
     #################################################
@@ -643,29 +733,84 @@ evaluate_hvg_continuous<-function(pcalist,pro,
         set.seed(70)
         index_sample_pca1<-sample(1:ncol(pro),size = 5000)
     }
-    pro_dist<-dist(t(pro[,index_sample_pca]))
-    pro_dist1<-dist(t(pro[,index_sample_pca1]))
-    for(i in 1:Num_method){
-        pc_dist<-dist(pcalist[[i]][index_sample_pca,])
-        pc_dist1<-dist(pcalist[[i]][index_sample_pca1,])
-        dist_cor[i]<-(cor(c(pro_dist),c(pc_dist))+cor(c(pro_dist1),c(pc_dist1)))/2
-        asw_score[i]<-(asw_func(pcalist[[i]][index_sample_pca,],pro_dist,cur_resolution)+
-                           asw_func(pcalist[[i]][index_sample_pca1,],pro_dist1,cur_resolution))/2
+
+    if(Nosample){
+        pro_dist<-dist(t(pro[,index_sample_pca]))
+        for(i in 1:Num_method){
+            pc_dist<-dist(pcalist[[i]][index_sample_pca,])
+            dist_cor[i]<-cor(c(pro_dist),c(pc_dist))
+            asw_score[i]<-asw_func_continuous(pcalist[[i]],pro_dist,cur_resolution)
+        }
+    }else{
+        pro_dist<-dist(t(pro[,index_sample_pca]))
+        pro_dist1<-dist(t(pro[,index_sample_pca1]))
+        for(i in 1:Num_method){
+            pc_dist<-dist(pcalist[[i]][index_sample_pca,])
+            pc_dist1<-dist(pcalist[[i]][index_sample_pca1,])
+            dist_cor[i]<-(cor(c(pro_dist),c(pc_dist))+cor(c(pro_dist1),c(pc_dist1)))/2
+            asw_score[i]<-(asw_func_continuous(pcalist[[i]][index_sample_pca,],pro_dist,cur_resolution)+
+                               asw_func_continuous(pcalist[[i]][index_sample_pca1,],pro_dist1,cur_resolution))/2
+        }
     }
 
     #######################################
-    ## NMI
+    ## ARI,NMI,F1
+    ari_list<-rep(NA,Num_method)
     nmi_list<-rep(NA,Num_method)
+    f1_list<-rep(NA,Num_method)
     if(ncol(pro)>5000){
         set.seed(80)
         index_sample_pca<-sample(1:ncol(pro),size = 5000)
         set.seed(90)
         index_sample_pca1<-sample(1:ncol(pro),size = 5000)
     }
-    for(i in 1:Num_method){
-        nmi_list[i]<-(nmi_func(pcalist[[i]][index_sample_pca,],pro[,index_sample_pca],cur_resolution)+
-                          nmi_func(pcalist[[i]][index_sample_pca1,],pro[,index_sample_pca1],cur_resolution))/2
+    if(Nosample){
+        for(i in 1:Num_method){
+            res<-ARI_NMI_F1_func_continuous(pcalist[[i]],pro,cur_resolution)
+            ari_list[i]<-res[1]
+            nmi_list[i]<-res[2]
+            f1_list[i]<-res[3]
+        }
+    }else{
+        for(i in 1:Num_method){
+            res<-ARI_NMI_F1_func_continuous(pcalist[[i]][index_sample_pca,],pro[,index_sample_pca],cur_resolution)
+            res1<-ARI_NMI_F1_func_continuous(pcalist[[i]][index_sample_pca1,],pro[,index_sample_pca1],cur_resolution)
+            ari_list[i]<-(res[1]+res1[1])/2
+            nmi_list[i]<-(res[2]+res1[2])/2
+            f1_list[i]<-(res[3]+res1[3])/2
+        }
+
     }
+
+
+    #######################################
+    ## max ARI,NMI,F1
+    max_ari_list<-rep(NA,Num_method)
+    max_nmi_list<-rep(NA,Num_method)
+    max_f1_list<-rep(NA,Num_method)
+    if(ncol(pro)>5000){
+        set.seed(80)
+        index_sample_pca<-sample(1:ncol(pro),size = 5000)
+        set.seed(90)
+        index_sample_pca1<-sample(1:ncol(pro),size = 5000)
+    }
+    if(Nosample){
+        for(i in 1:Num_method){
+            res<-ARI_NMI_F1_func_Max_continuous(pcalist[[i]],pro)
+            max_ari_list[i]<-res[1]
+            max_nmi_list[i]<-res[2]
+            max_f1_list[i]<-res[3]
+        }
+    }else{
+        for(i in 1:Num_method){
+            res<-ARI_NMI_F1_func_Max_continuous(pcalist[[i]][index_sample_pca,],pro[,index_sample_pca])
+            res1<-ARI_NMI_F1_func_Max_continuous(pcalist[[i]][index_sample_pca1,],pro[,index_sample_pca1])
+            max_ari_list[i]<-(res[1]+res1[1])/2
+            max_nmi_list[i]<-(res[2]+res1[2])/2
+            max_f1_list[i]<-(res[3]+res1[3])/2
+        }
+    }
+
 
 
     newList<-list(
@@ -674,7 +819,12 @@ evaluate_hvg_continuous<-function(pcalist,pro,
         "3nn"=nn_mse,
         "dist_cor"=dist_cor,
         "asw_score"=asw_score,
-        "nmi"=nmi_list)
+        "ari"=ari_list,
+        "nmi"=nmi_list,
+        "f1"=f1_list,
+        "max_ari"=max_ari_list,
+        "max_nmi"=max_nmi_list,
+        "max_f1"=max_f1_list)
     return(newList)
 }
 
