@@ -33,7 +33,7 @@ ARI_NMI_F1_func<-function(
     N_cluster0<-length(unique(cluster_label))
     if(N_cluster0>=N_label){
         print("Resolution 0 still larger than true")
-        return(c(N_clusterc,
+        return(c(N_cluster0,
                  adjustedRandIndex(cluster_label,cell_label),
                  NMI(cbind(1:length(cluster_label),cluster_label),cbind(1:length(cell_label),cell_label))$value,
                  f1(cluster_label,cell_label)
@@ -45,7 +45,7 @@ ARI_NMI_F1_func<-function(
                                   verbose = F)[[1]]
     N_cluster1<-length(unique(cluster_label))
     if(N_cluster1 <= N_label ){
-        return(c(N_clusterc,
+        return(c(N_cluster1,
                  adjustedRandIndex(cluster_label,cell_label),
                  NMI(cbind(1:length(cluster_label),cluster_label),cbind(1:length(cell_label),cell_label))$value,
                  f1(cluster_label,cell_label)
