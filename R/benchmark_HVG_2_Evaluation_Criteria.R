@@ -590,7 +590,7 @@ ARI_NMI_F1_func_continuous<-function(
                                   verbose = F)[[1]]
     cluster_label_pro <- as.numeric(as.character(cluster_label_pro))
     c(adjustedRandIndex(cluster_label,cluster_label_pro),
-        NMI(cbind(1:length(cluster_label),cluster_label),cbind(1:length(cluster_label_pro),cluster_label_pro)),
+        NMI(cbind(1:length(cluster_label),cluster_label),cbind(1:length(cluster_label_pro),cluster_label_pro))$value,
       f1(cluster_label_pro,cluster_label))
 }
 
@@ -623,7 +623,7 @@ ARI_NMI_F1_func_Max_continuous<-function(
 c(    max(sapply(1:20, function(i){sapply(1:20, function(j){
         adjustedRandIndex(cluster_label[,i],cluster_label_pro[,j])})})),
     max(sapply(1:20, function(i){sapply(1:20, function(j){
-NMI(cbind(1:length(cluster_label[,i]),cluster_label[,i]),cbind(1:length(cluster_label_pro[,j]),cluster_label_pro[,j]))
+NMI(cbind(1:length(cluster_label[,i]),cluster_label[,i]),cbind(1:length(cluster_label_pro[,j]),cluster_label_pro[,j]))$value
         })})),
 max(sapply(1:20, function(i){sapply(1:20, function(j){
     f1(cluster_label_pro[,j],cluster_label[,i])})}))
