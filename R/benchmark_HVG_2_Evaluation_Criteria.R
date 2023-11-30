@@ -786,7 +786,7 @@ evaluate_hvg_continuous<-function(pcalist,pro,
             pc_dist<-dist(pcalist[[i]][index_sample_pca,])
             dist_cor[i]<-cor(c(pro_dist),c(pc_dist))
             asw_score[i]<-asw_func_continuous(pcalist[[i]],pro_dist,cur_resolution)
-            max_asw_score[i]<-asw_max_func_continuous(pcalist[[i]],pro_dist,cur_resolution)
+            max_asw_score[i]<-asw_max_func_continuous(pcalist[[i]],pro_dist)
         }
     }else{
         pro_dist<-dist(t(pro[,index_sample_pca]))
@@ -797,8 +797,8 @@ evaluate_hvg_continuous<-function(pcalist,pro,
             dist_cor[i]<-(cor(c(pro_dist),c(pc_dist))+cor(c(pro_dist1),c(pc_dist1)))/2
             asw_score[i]<-(asw_func_continuous(pcalist[[i]][index_sample_pca,],pro_dist,cur_resolution)+
                                asw_func_continuous(pcalist[[i]][index_sample_pca1,],pro_dist1,cur_resolution))/2
-            max_asw_score[i]<-(asw_max_func_continuous(pcalist[[i]][index_sample_pca,],pro_dist,cur_resolution)+
-                             asw_max_func_continuous(pcalist[[i]][index_sample_pca1,],pro_dist1,cur_resolution))/2
+            max_asw_score[i]<-(asw_max_func_continuous(pcalist[[i]][index_sample_pca,],pro_dist)+
+                             asw_max_func_continuous(pcalist[[i]][index_sample_pca1,],pro_dist1))/2
         }
     }
 
