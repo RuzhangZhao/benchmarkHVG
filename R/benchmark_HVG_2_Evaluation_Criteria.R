@@ -86,7 +86,21 @@ ARI_NMI_F1_func<-function(
              ))
 }
 
-
+#' Criterion 1: ARI & NMI & F1 with closest cell type number
+#' @details 1
+#'
+#' @param embedding embedding
+#' @param cell_label cell_label
+#'
+#'
+#' @return
+#'
+#' @import Seurat
+#' @importFrom mclust adjustedRandIndex
+#' @importFrom NMI NMI
+#' @importFrom Metrics f1
+#' @export
+#'
 ARI_NMI_F1_func_Max<-function(
         embedding,
         cell_label
@@ -465,6 +479,48 @@ within_between_var_ratio_continuous<-function(
     mean(var_r)
 }
 
+
+# Evaluate with CITEseq & MultiomeATAC
+#' Criterion 1: Variance Ratio
+#' @details 1
+#'
+#' @param embedding embedding
+#' @param pro pro
+#'
+#' @import Seurat
+#' @importFrom Rfast rowVars
+#' @return
+#'
+#' @export
+#'
+within_between_var_ratio_max_continuous<-function(
+    embedding,
+    pro){
+  snn_<- FindNeighbors(object = embedding,
+                       nn.method = "rann",
+                       verbose = F)$snn
+  res<-sapply(seq(0.1,2,0.1), function(cur_resolution){
+    cluster_label <- FindClusters(snn_,
+                                  resolution = cur_resolution,
+                                  verbose = F)[[1]]
+    cluster_label=as.numeric(as.character(cluster_label))
+    # sorted unique cluster label
+    label_index<-sort(as.numeric(
+      unique(as.character(cluster_label))))
+    # number of cluster label
+    N_label<-length(label_index)
+    #print(paste0("Current Label Number is ",N_label))
+    within<-sapply(1:N_label, function(i){
+      index_i<-which(cluster_label == label_index[i])
+      (length(index_i)-1)*rowVars(pro[,index_i])
+    })
+    all_var<-(ncol(pro)-1)*rowVars(pro)
+    var_r<-rowSums(within)/(all_var- rowSums(within))
+    mean(var_r)
+  })
+  min(res)
+}
+
 #' Criterion 2: Nearest Neighbor Mean Square Error
 #' @details 2
 #'
@@ -547,7 +603,6 @@ knn_ratio_continuous<-function(embedding,pro,k = 100,
 #'
 #' @export
 #'
-library(cluster)
 asw_func_continuous<-function(
         embedding,
         dmat,
@@ -565,6 +620,17 @@ asw_func_continuous<-function(
     mean(silhouette_res[,3])
 }
 
+#' Criterion 5: ASW
+#' @details 5
+#'
+#' @param embedding embedding
+#' @param dmat dmat
+#'
+#' @importFrom cluster silhouette
+#' @return
+#'
+#' @export
+#'
 asw_max_func_continuous<-function(
     embedding,
     dmat){
@@ -628,7 +694,6 @@ ARI_NMI_F1_func_continuous<-function(
 #'
 #' @param embedding embedding
 #' @param pro pro
-#' @param resolution resolution
 #'
 #' @importFrom mclust adjustedRandIndex
 #' @importFrom NMI NMI
@@ -638,7 +703,6 @@ ARI_NMI_F1_func_continuous<-function(
 #'
 #' @export
 #'
-
 ARI_NMI_F1_func_Max_continuous<-function(
         embedding,
         pro){
@@ -725,10 +789,11 @@ evaluate_hvg_continuous<-function(pcalist,pro,
     # Within Between Cluster Variance Ratio
     message("var_ratio")
     variance_ratio<-rep(NA,Num_method)
+    max_variance_ratio<-rep(NA,Num_method)
     for(i in 1:Num_method){
         if(Nosample){
-            variance_ratio[i]<-within_between_var_ratio_continuous(pcalist[[i]][index_sample_pca,],
-                                                                   pro[,index_sample_pca],cur_resolution)
+            variance_ratio[i]<-within_between_var_ratio_continuous(pcalist[[i]],pro,cur_resolution)
+            max_variance_ratio[i]<-within_between_var_ratio_max_continuous(pcalist[[i]],pro)
         }else{
             variance_ratio[i]<-(within_between_var_ratio_continuous(pcalist[[i]][index_sample_pca,],
                                                                     pro[,index_sample_pca],cur_resolution)+
@@ -736,6 +801,12 @@ evaluate_hvg_continuous<-function(pcalist,pro,
                                                                         pro[,index_sample_pca1],cur_resolution)+
                                     within_between_var_ratio_continuous(pcalist[[i]][index_sample_pca2,],
                                                                         pro[,index_sample_pca2],cur_resolution))/3
+            max_variance_ratio[i]<-(within_between_var_ratio_max_continuous(pcalist[[i]][index_sample_pca,],
+                                                                    pro[,index_sample_pca])+
+                                  within_between_var_ratio_max_continuous(pcalist[[i]][index_sample_pca1,],
+                                                                      pro[,index_sample_pca1])+
+                                  within_between_var_ratio_max_continuous(pcalist[[i]][index_sample_pca2,],
+                                                                      pro[,index_sample_pca2]))/3
         }
     }
 
@@ -866,6 +937,7 @@ evaluate_hvg_continuous<-function(pcalist,pro,
 
     newList<-list(
         "var_ratio"=variance_ratio,
+        "max_var_ratio"=max_variance_ratio,
         "knn_ratio"=knnratio,
         "3nn"=nn_mse,
         "dist_cor"=dist_cor,
