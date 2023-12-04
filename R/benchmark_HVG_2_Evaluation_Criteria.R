@@ -784,6 +784,9 @@ evaluate_hvg_continuous<-function(pcalist,pro,
         Nosample<-TRUE
     }
 
+    if(input == "MultiomeATAC"){
+      Nosample<-TRUE
+    }
 
     #################################################
     # Within Between Cluster Variance Ratio
