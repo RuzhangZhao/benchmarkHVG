@@ -826,6 +826,8 @@ evaluate_hvg_continuous<-function(pcalist,pro,
     if(!Nosample){
         set.seed(40)
         index_sample_pca<-sample(1:ncol(pro),size = 10000)
+    }else{
+       index_sample_pca<-1:ncol(pro)
     }
 
     for(i in 1:Num_method){
@@ -860,9 +862,9 @@ evaluate_hvg_continuous<-function(pcalist,pro,
     }
 
     if(Nosample){
-        pro_dist<-dist(t(pro[,index_sample_pca]))
+        pro_dist<-dist(t(pro))
         for(i in 1:Num_method){
-            pc_dist<-dist(pcalist[[i]][index_sample_pca,])
+            pc_dist<-dist(pcalist[[i]])
             dist_cor[i]<-cor(c(pro_dist),c(pc_dist))
             asw_score[i]<-asw_func_continuous(pcalist[[i]],pro_dist,cur_resolution)
             max_asw_score[i]<-asw_max_func_continuous(pcalist[[i]],pro_dist)
