@@ -866,8 +866,8 @@ evaluate_hvg_continuous<-function(pcalist,pro,
         for(i in 1:Num_method){
             pc_dist<-dist(pcalist[[i]])
             dist_cor[i]<-cor(c(pro_dist),c(pc_dist))
-            asw_score[i]<-asw_func_continuous(pcalist[[i]],pro_dist,cur_resolution)
-            max_asw_score[i]<-asw_max_func_continuous(pcalist[[i]],pro_dist)
+            #asw_score[i]<-asw_func_continuous(pcalist[[i]],pro_dist,cur_resolution)
+            #max_asw_score[i]<-asw_max_func_continuous(pcalist[[i]],pro_dist)
         }
     }else{
         pro_dist<-dist(t(pro[,index_sample_pca]))
@@ -876,10 +876,10 @@ evaluate_hvg_continuous<-function(pcalist,pro,
             pc_dist<-dist(pcalist[[i]][index_sample_pca,])
             pc_dist1<-dist(pcalist[[i]][index_sample_pca1,])
             dist_cor[i]<-(cor(c(pro_dist),c(pc_dist))+cor(c(pro_dist1),c(pc_dist1)))/2
-            asw_score[i]<-(asw_func_continuous(pcalist[[i]][index_sample_pca,],pro_dist,cur_resolution)+
-                               asw_func_continuous(pcalist[[i]][index_sample_pca1,],pro_dist1,cur_resolution))/2
-            max_asw_score[i]<-(asw_max_func_continuous(pcalist[[i]][index_sample_pca,],pro_dist)+
-                             asw_max_func_continuous(pcalist[[i]][index_sample_pca1,],pro_dist1))/2
+            #asw_score[i]<-(asw_func_continuous(pcalist[[i]][index_sample_pca,],pro_dist,cur_resolution)+
+            #                   asw_func_continuous(pcalist[[i]][index_sample_pca1,],pro_dist1,cur_resolution))/2
+            #max_asw_score[i]<-(asw_max_func_continuous(pcalist[[i]][index_sample_pca,],pro_dist)+
+            #                 asw_max_func_continuous(pcalist[[i]][index_sample_pca1,],pro_dist1))/2
         }
     }
 
@@ -900,7 +900,7 @@ evaluate_hvg_continuous<-function(pcalist,pro,
             res<-ARI_NMI_F1_func_continuous(pcalist[[i]],pro,cur_resolution)
             ari_list[i]<-res[1]
             nmi_list[i]<-res[2]
-            f1_list[i]<-res[3]
+            #f1_list[i]<-res[3]
         }
     }else{
         for(i in 1:Num_method){
@@ -908,7 +908,7 @@ evaluate_hvg_continuous<-function(pcalist,pro,
             res1<-ARI_NMI_F1_func_continuous(pcalist[[i]][index_sample_pca1,],pro[,index_sample_pca1],cur_resolution)
             ari_list[i]<-(res[1]+res1[1])/2
             nmi_list[i]<-(res[2]+res1[2])/2
-            f1_list[i]<-(res[3]+res1[3])/2
+            #f1_list[i]<-(res[3]+res1[3])/2
         }
 
     }
@@ -931,7 +931,7 @@ evaluate_hvg_continuous<-function(pcalist,pro,
             res<-ARI_NMI_F1_func_Max_continuous(pcalist[[i]],pro)
             max_ari_list[i]<-res[1]
             max_nmi_list[i]<-res[2]
-            max_f1_list[i]<-res[3]
+            #max_f1_list[i]<-res[3]
         }
     }else{
         for(i in 1:Num_method){
@@ -939,7 +939,7 @@ evaluate_hvg_continuous<-function(pcalist,pro,
             res1<-ARI_NMI_F1_func_Max_continuous(pcalist[[i]][index_sample_pca1,],pro[,index_sample_pca1])
             max_ari_list[i]<-(res[1]+res1[1])/2
             max_nmi_list[i]<-(res[2]+res1[2])/2
-            max_f1_list[i]<-(res[3]+res1[3])/2
+            #max_f1_list[i]<-(res[3]+res1[3])/2
         }
     }
 
