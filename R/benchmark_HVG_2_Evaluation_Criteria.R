@@ -110,7 +110,8 @@ ARI_NMI_F1_func_Max<-function(
                          nn.method = "rann",
                          verbose = F)$snn
     Nresolution=20
-    resolution_range=exp(seq(log(0.01),log(1),(log(1)-log(0.01))/Nresolution))
+    #resolution_range=exp(seq(log(0.01),log(1),(log(1)-log(0.01))/Nresolution))
+    resolution_range=seq(0.1,2,0.1)
     res<-sapply(resolution_range,function(cur_resolution){
         cluster_label <- FindClusters(snn_,
                                       resolution = cur_resolution,
@@ -502,7 +503,8 @@ within_between_var_ratio_max_continuous<-function(
                        nn.method = "rann",
                        verbose = F)$snn
   Nresolution=20
-  resolution_range=exp(seq(log(0.01),log(1),(log(1)-log(0.01))/Nresolution))
+  #resolution_range=exp(seq(log(0.01),log(1),(log(1)-log(0.01))/Nresolution))
+  resolution_range=seq(0.1,2,0.1)
   res<-sapply(resolution_range, function(cur_resolution){
     cluster_label <- FindClusters(snn_,
                                   resolution = cur_resolution,
@@ -643,7 +645,8 @@ asw_max_func_continuous<-function(
                        nn.method = "rann",
                        verbose = F)$snn
   Nresolution=20
-  resolution_range=exp(seq(log(0.01),log(1),(log(1)-log(0.01))/Nresolution))
+  #resolution_range=exp(seq(log(0.01),log(1),(log(1)-log(0.01))/Nresolution))
+  resolution_range=seq(0.1,2,0.1)
   res_<-sapply(resolution_range, function(cur_resolution){
     cluster_label <- FindClusters(snn_,
                                   resolution = cur_resolution,
@@ -712,7 +715,8 @@ ARI_NMI_F1_func_Max_continuous<-function(
         embedding,
         pro){
     Nresolution=20
-    resolution_range=exp(seq(log(0.01),log(1),(log(1)-log(0.01))/Nresolution))
+    #resolution_range=exp(seq(log(0.01),log(1),(log(1)-log(0.01))/Nresolution))
+    resolution_range=seq(0.1,2,0.1)
     snn_<- FindNeighbors(object = embedding,
                          nn.method = "rann",
                          verbose = F)$snn
