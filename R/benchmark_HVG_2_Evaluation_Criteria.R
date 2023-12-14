@@ -1,7 +1,7 @@
 # Author: Ruzhang Zhao
 # Evaluate with cell sorting
 
-#' Criterion 1: ARI & NMI & F1 with closest cell type number
+#' Criterion 1: ARI & NMI with closest cell type number
 #' @details 1
 #'
 #' @param embedding embedding
@@ -14,10 +14,9 @@
 #' @import Seurat
 #' @importFrom mclust adjustedRandIndex
 #' @importFrom NMI NMI
-#' @importFrom Metrics f1
 #' @export
 #'
-ARI_NMI_F1_func<-function(
+ARI_NMI_func<-function(
         embedding,
         cell_label,
         maxit = 10
@@ -35,8 +34,7 @@ ARI_NMI_F1_func<-function(
         print("Resolution 0 still larger than true")
         return(c(N_cluster0,
                  adjustedRandIndex(cluster_label,cell_label),
-                 NMI(cbind(1:length(cluster_label),cluster_label),cbind(1:length(cell_label),cell_label))$value,
-                 f1(cluster_label,cell_label)
+                 NMI(cbind(1:length(cluster_label),cluster_label),cbind(1:length(cell_label),cell_label))$value
         ))
     }
 
@@ -47,8 +45,7 @@ ARI_NMI_F1_func<-function(
     if(N_cluster1 <= N_label ){
         return(c(N_cluster1,
                  adjustedRandIndex(cluster_label,cell_label),
-                 NMI(cbind(1:length(cluster_label),cluster_label),cbind(1:length(cell_label),cell_label))$value,
-                 f1(cluster_label,cell_label)
+                 NMI(cbind(1:length(cluster_label),cluster_label),cbind(1:length(cell_label),cell_label))$value
         ))
     }else if (N_cluster1 > N_label){
         a<-0
@@ -66,8 +63,7 @@ ARI_NMI_F1_func<-function(
             keepsign<-FALSE
             return(c(N_clusterc,
                      adjustedRandIndex(cluster_label,cell_label),
-                     NMI(cbind(1:length(cluster_label),cluster_label),cbind(1:length(cell_label),cell_label))$value,
-                     f1(cluster_label,cell_label)
+                     NMI(cbind(1:length(cluster_label),cluster_label),cbind(1:length(cell_label),cell_label))$value
             ))
         }else if (N_clusterc < N_label){
             a<-c
@@ -81,12 +77,11 @@ ARI_NMI_F1_func<-function(
     }
     return(c(N_clusterc,
              adjustedRandIndex(cluster_label,cell_label),
-            NMI(cbind(1:length(cluster_label),cluster_label),cbind(1:length(cell_label),cell_label))$value,
-            f1(cluster_label,cell_label)
+            NMI(cbind(1:length(cluster_label),cluster_label),cbind(1:length(cell_label),cell_label))$value
              ))
 }
 
-#' Criterion 1: ARI & NMI & F1 with closest cell type number
+#' Criterion 1: ARI & NMI with closest cell type number
 #' @details 1
 #'
 #' @param embedding embedding
@@ -98,10 +93,9 @@ ARI_NMI_F1_func<-function(
 #' @import Seurat
 #' @importFrom mclust adjustedRandIndex
 #' @importFrom NMI NMI
-#' @importFrom Metrics f1
 #' @export
 #'
-ARI_NMI_F1_func_Max<-function(
+ARI_NMI_func_Max<-function(
         embedding,
         cell_label
 ){
@@ -117,10 +111,9 @@ ARI_NMI_F1_func_Max<-function(
                                       resolution = cur_resolution,
                                       verbose = F)[[1]]
         c(adjustedRandIndex(cluster_label,cell_label),
-        NMI(cbind(1:length(cluster_label),cluster_label),cbind(1:length(cell_label),cell_label))$value,
-        f1(cluster_label,cell_label))
+        NMI(cbind(1:length(cluster_label),cluster_label),cbind(1:length(cell_label),cell_label))$value)
     })
-    c(max(res[1,]),max(res[2,]),max(res[3,]))
+    c(max(res[1,]),max(res[2,]))
 }
 
 #' Criterion 2: Within VS Between Cell Type Variance Ratio
@@ -315,19 +308,16 @@ evaluate_hvg_discrete<-function(pcalist,label){
     message("ari_nmi_louvain")
     ari_list<-rep(NA,Num_method)
     nmi_list<-rep(NA,Num_method)
-    f1_list<-rep(NA,Num_method)
     for(i in 1:Num_method){
         if(Nosample){
-            res_ari=ARI_NMI_F1_func(pcalist[[i]],label)
+            res_ari=ARI_NMI_func(pcalist[[i]],label)
             ari_list[i]<-res_ari[2]
             nmi_list[i]<-res_ari[3]
-            f1_list[i]<-res_ari[4]
         }else{
-            res_ari=ARI_NMI_F1_func(pcalist[[i]][index_sample_pca,],label[index_sample_pca])
-            res_ari1=ARI_NMI_F1_func(pcalist[[i]][index_sample_pca1,],label[index_sample_pca1])
+            res_ari=ARI_NMI_func(pcalist[[i]][index_sample_pca,],label[index_sample_pca])
+            res_ari1=ARI_NMI_func(pcalist[[i]][index_sample_pca1,],label[index_sample_pca1])
             ari_list[i]<-(res_ari[2]+res_ari1[2])/2
             nmi_list[i]<-(res_ari[3]+res_ari1[3])/2
-            f1_list[i]<-(res_ari[4]+res_ari1[4])/2
         }
     }
 
@@ -336,19 +326,16 @@ evaluate_hvg_discrete<-function(pcalist,label){
     message("ari_nmi_max")
     max_ari_list<-rep(NA,Num_method)
     max_nmi_list<-rep(NA,Num_method)
-    max_f1_list<-rep(NA,Num_method)
     for(i in 1:Num_method){
         if(Nosample){
-            res_ari=ARI_NMI_F1_func_Max(pcalist[[i]],label)
+            res_ari=ARI_NMI_func_Max(pcalist[[i]],label)
             max_ari_list[i]<-res_ari[1]
             max_nmi_list[i]<-res_ari[2]
-            max_f1_list[i]<-res_ari[3]
         }else{
-            res_ari=ARI_NMI_F1_func_Max(pcalist[[i]][index_sample_pca,],label[index_sample_pca])
-            res_ari1=ARI_NMI_F1_func_Max(pcalist[[i]][index_sample_pca1,],label[index_sample_pca1])
+            res_ari=ARI_NMI_func_Max(pcalist[[i]][index_sample_pca,],label[index_sample_pca])
+            res_ari1=ARI_NMI_func_Max(pcalist[[i]][index_sample_pca1,],label[index_sample_pca1])
             max_ari_list[i]<-(res_ari[1]+res_ari1[1])/2
             max_nmi_list[i]<-(res_ari[2]+res_ari1[2])/2
-            max_f1_list[i]<-(res_ari[3]+res_ari1[3])/2
         }
     }
 
@@ -434,10 +421,8 @@ evaluate_hvg_discrete<-function(pcalist,label){
             "asw_score"=asw_score,
             "ari"=ari_list,
             "nmi"=nmi_list,
-            "f1"=f1_list,
             "max_ari"=max_ari_list,
-            "max_nmi"=max_nmi_list,
-            "max_f1"=max_f1_list))
+            "max_nmi"=max_nmi_list))
 }
 
 # Evaluate with CITEseq & MultiomeATAC
@@ -667,12 +652,11 @@ asw_max_func_continuous<-function(
 #'
 #' @importFrom mclust adjustedRandIndex
 #' @importFrom NMI NMI
-#' @importFrom Metrics f1
 #' @return
 #'
 #' @export
 #'
-ARI_NMI_F1_func_continuous<-function(
+ARI_NMI_func_continuous<-function(
         embedding,
         pro,
         resolution = 0.2){
@@ -693,8 +677,7 @@ ARI_NMI_F1_func_continuous<-function(
                                   verbose = F)[[1]]
     cluster_label_pro <- as.numeric(as.character(cluster_label_pro))
     c(adjustedRandIndex(cluster_label,cluster_label_pro),
-        NMI(cbind(1:length(cluster_label),cluster_label),cbind(1:length(cluster_label_pro),cluster_label_pro))$value,
-      f1(cluster_label_pro,cluster_label))
+        NMI(cbind(1:length(cluster_label),cluster_label),cbind(1:length(cluster_label_pro),cluster_label_pro))$value)
 }
 
 #' Criterion 6: NMI
@@ -705,13 +688,12 @@ ARI_NMI_F1_func_continuous<-function(
 #'
 #' @importFrom mclust adjustedRandIndex
 #' @importFrom NMI NMI
-#' @importFrom Metrics f1
 #' @importFrom cluster silhouette
 #' @return
 #'
 #' @export
 #'
-ARI_NMI_F1_func_Max_continuous<-function(
+ARI_NMI_func_Max_continuous<-function(
         embedding,
         pro){
     Nresolution=20
@@ -741,9 +723,7 @@ c(    max(sapply(1:Nresolution, function(i){sapply(1:Nresolution, function(j){
         adjustedRandIndex(cluster_label[,i],cluster_label_pro[,j])})})),
     max(sapply(1:Nresolution, function(i){sapply(1:Nresolution, function(j){
 NMI(cbind(1:length(cluster_label[,i]),cluster_label[,i]),cbind(1:length(cluster_label_pro[,j]),cluster_label_pro[,j]))$value
-        })})),
-max(sapply(1:Nresolution, function(i){sapply(1:Nresolution, function(j){
-    f1(cluster_label_pro[,j],cluster_label[,i])})}))
+        })}))
 )
 
 }
@@ -888,11 +868,10 @@ evaluate_hvg_continuous<-function(pcalist,pro,
     }
 
     #######################################
-    ## ARI,NMI,F1
-    message("ari,nmi,f1")
+    ## ARI,NMI
+    message("ari,nmi")
     ari_list<-rep(NA,Num_method)
     nmi_list<-rep(NA,Num_method)
-    f1_list<-rep(NA,Num_method)
     if(!Nosample){
         set.seed(80)
         index_sample_pca<-sample(1:ncol(pro),size = 10000)
@@ -901,29 +880,26 @@ evaluate_hvg_continuous<-function(pcalist,pro,
     }
     if(Nosample){
         for(i in 1:Num_method){
-            res<-ARI_NMI_F1_func_continuous(pcalist[[i]],pro,cur_resolution)
+            res<-ARI_NMI_func_continuous(pcalist[[i]],pro,cur_resolution)
             ari_list[i]<-res[1]
             nmi_list[i]<-res[2]
-            #f1_list[i]<-res[3]
         }
     }else{
         for(i in 1:Num_method){
-            res<-ARI_NMI_F1_func_continuous(pcalist[[i]][index_sample_pca,],pro[,index_sample_pca],cur_resolution)
-            res1<-ARI_NMI_F1_func_continuous(pcalist[[i]][index_sample_pca1,],pro[,index_sample_pca1],cur_resolution)
+            res<-ARI_NMI_func_continuous(pcalist[[i]][index_sample_pca,],pro[,index_sample_pca],cur_resolution)
+            res1<-ARI_NMI_func_continuous(pcalist[[i]][index_sample_pca1,],pro[,index_sample_pca1],cur_resolution)
             ari_list[i]<-(res[1]+res1[1])/2
             nmi_list[i]<-(res[2]+res1[2])/2
-            #f1_list[i]<-(res[3]+res1[3])/2
         }
 
     }
 
 
     #######################################
-    ## max ARI,NMI,F1
-    message("maxari,maxnmi,maxf1")
+    ## max ARI,NMI
+    message("maxari,maxnmi")
     max_ari_list<-rep(NA,Num_method)
     max_nmi_list<-rep(NA,Num_method)
-    max_f1_list<-rep(NA,Num_method)
     if(!Nosample){
         set.seed(80)
         index_sample_pca<-sample(1:ncol(pro),size = 10000)
@@ -932,18 +908,16 @@ evaluate_hvg_continuous<-function(pcalist,pro,
     }
     if(Nosample){
         for(i in 1:Num_method){
-            res<-ARI_NMI_F1_func_Max_continuous(pcalist[[i]],pro)
+            res<-ARI_NMI_func_Max_continuous(pcalist[[i]],pro)
             max_ari_list[i]<-res[1]
             max_nmi_list[i]<-res[2]
-            #max_f1_list[i]<-res[3]
         }
     }else{
         for(i in 1:Num_method){
-            res<-ARI_NMI_F1_func_Max_continuous(pcalist[[i]][index_sample_pca,],pro[,index_sample_pca])
-            res1<-ARI_NMI_F1_func_Max_continuous(pcalist[[i]][index_sample_pca1,],pro[,index_sample_pca1])
+            res<-ARI_NMI_func_Max_continuous(pcalist[[i]][index_sample_pca,],pro[,index_sample_pca])
+            res1<-ARI_NMI_func_Max_continuous(pcalist[[i]][index_sample_pca1,],pro[,index_sample_pca1])
             max_ari_list[i]<-(res[1]+res1[1])/2
             max_nmi_list[i]<-(res[2]+res1[2])/2
-            #max_f1_list[i]<-(res[3]+res1[3])/2
         }
     }
 
@@ -958,11 +932,9 @@ evaluate_hvg_continuous<-function(pcalist,pro,
         "asw_score"=asw_score,
         "ari"=ari_list,
         "nmi"=nmi_list,
-        "f1"=f1_list,
         "max_asw"=max_asw_score,
         "max_ari"=max_ari_list,
-        "max_nmi"=max_nmi_list,
-        "max_f1"=max_f1_list)
+        "max_nmi"=max_nmi_list)
     return(newList)
 }
 

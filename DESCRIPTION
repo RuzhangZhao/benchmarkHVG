@@ -23,8 +23,7 @@ Imports:
     stats,
     lisi,
     NMI,
-    cluster,
-    Metrics
+    cluster
 License: GPL-3
 Encoding: UTF-8
 RoxygenNote: 7.2.1

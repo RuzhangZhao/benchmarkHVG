@@ -7,7 +7,7 @@
 mixture_hvg_pca(
   rna_mat,
   nfeatures = 2000,
-  method_list = c("mv_nc", "mv_lognc", "scran_pos", "seuratv1", "mean_max_ct")
+  method_list = c("mv_lognc", "logmv_lognc", "scran_pos", "seuratv1", "mean_max_nc")
 )
 }
 \arguments{

@@ -241,7 +241,6 @@ hvg_pca<-function(rna_mat,
 
     #library(scran)
     #sce <- SingleCellExperiment(list(counts=rna_mat))
-    #sce <- logNormCounts(sce)
     #dec<- modelGeneVarByPoisson(sce)
     #top.hvgs3 <- getTopHVGs(dec, n=2000)
     #rm(sce)
@@ -460,7 +459,7 @@ hvg_pca<-function(rna_mat,
 #'
 mixture_hvg_pca<-function(rna_mat,
                           nfeatures = 2000,
-                          method_list=c("mv_nc","mv_lognc","scran_pos","seuratv1","mean_max_ct")){
+                          method_list=c("mv_lognc","logmv_lognc","scran_pos","seuratv1","mean_max_nc")){
 
   seurat.obj.pca<-list()
   var.seurat.obj<-list()
