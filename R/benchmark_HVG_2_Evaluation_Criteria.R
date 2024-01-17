@@ -297,29 +297,29 @@ evaluate_hvg_discrete<-function(pcalist,label){
         }
     }
 
-    if(!Nosample){
-        set.seed(30)
-        index_sample_pca<-createDataPartition(label,p = min(1,10000/length(label)))$Resample1
-        set.seed(40)
-        index_sample_pca1<-createDataPartition(label,p = min(1,10000/length(label)))$Resample1
-    }
+    #if(!Nosample){
+    #    set.seed(30)
+    #    index_sample_pca<-createDataPartition(label,p = min(1,10000/length(label)))$Resample1
+    #    set.seed(40)
+    #    index_sample_pca1<-createDataPartition(label,p = min(1,10000/length(label)))$Resample1
+    #}
     #################################################
     # ARI with Louvain clustering with the closest cell type number
-    message("ari_nmi_louvain")
-    ari_list<-rep(NA,Num_method)
-    nmi_list<-rep(NA,Num_method)
-    for(i in 1:Num_method){
-        if(Nosample){
-            res_ari=ARI_NMI_func(pcalist[[i]],label)
-            ari_list[i]<-res_ari[2]
-            nmi_list[i]<-res_ari[3]
-        }else{
-            res_ari=ARI_NMI_func(pcalist[[i]][index_sample_pca,],label[index_sample_pca])
-            res_ari1=ARI_NMI_func(pcalist[[i]][index_sample_pca1,],label[index_sample_pca1])
-            ari_list[i]<-(res_ari[2]+res_ari1[2])/2
-            nmi_list[i]<-(res_ari[3]+res_ari1[3])/2
-        }
-    }
+    #message("ari_nmi_louvain")
+    #ari_list<-rep(NA,Num_method)
+    #nmi_list<-rep(NA,Num_method)
+    #for(i in 1:Num_method){
+    #    if(Nosample){
+    #        res_ari=ARI_NMI_func(pcalist[[i]],label)
+    #        ari_list[i]<-res_ari[2]
+    #        nmi_list[i]<-res_ari[3]
+    #    }else{
+    #        res_ari=ARI_NMI_func(pcalist[[i]][index_sample_pca,],label[index_sample_pca])
+    #        res_ari1=ARI_NMI_func(pcalist[[i]][index_sample_pca1,],label[index_sample_pca1])
+    #        ari_list[i]<-(res_ari[2]+res_ari1[2])/2
+    #        nmi_list[i]<-(res_ari[3]+res_ari1[3])/2
+    #    }
+    #}
 
     #################################################
     # ARI with Louvain clustering with the best number
@@ -358,24 +358,24 @@ evaluate_hvg_discrete<-function(pcalist,label){
 
     #################################################
     # Distance Ratio
-    dist_ratio<-rep(NA,Num_method)
+    #dist_ratio<-rep(NA,Num_method)
 
-    if(!Nosample){
-        set.seed(60)
-        index_sample_pca<-createDataPartition(label,p = min(1,10000/length(label)))$Resample1
-        set.seed(70)
-        index_sample_pca1<-createDataPartition(label,p = min(1,10000/length(label)))$Resample1
-    }
+    #if(!Nosample){
+    #    set.seed(60)
+    #    index_sample_pca<-createDataPartition(label,p = min(1,10000/length(label)))$Resample1
+    #    set.seed(70)
+    #    index_sample_pca1<-createDataPartition(label,p = min(1,10000/length(label)))$Resample1
+    #}
 
-    for(i in 1:Num_method){
-        if(Nosample){
-            dist_ratio[i]<-within_between_dist_ratio(pcalist[[i]],label)
-        }else{
-            dist_ratio[i]<-
-                (within_between_dist_ratio(pcalist[[i]][index_sample_pca,],label[index_sample_pca])+
-                     within_between_dist_ratio(pcalist[[i]][index_sample_pca1,],label[index_sample_pca1]))/2
-        }
-    }
+    #for(i in 1:Num_method){
+    #    if(Nosample){
+    #        dist_ratio[i]<-within_between_dist_ratio(pcalist[[i]],label)
+    #    }else{
+    #        dist_ratio[i]<-
+    #            (within_between_dist_ratio(pcalist[[i]][index_sample_pca,],label[index_sample_pca])+
+    #                 within_between_dist_ratio(pcalist[[i]][index_sample_pca1,],label[index_sample_pca1]))/2
+    #    }
+    #}
     lisi_score<-rep(NA,Num_method)
     if(!Nosample){
         set.seed(80)
@@ -414,13 +414,13 @@ evaluate_hvg_discrete<-function(pcalist,label){
 
     return(list(
             "var_ratio"=variance_ratio,
-            "ari"=ari_list,
+            #"ari"=ari_list,
             "3nn"=nn_acc,
-            "dist_ratio"=dist_ratio,
+            #"dist_ratio"=dist_ratio,
             "lisi"=lisi_score,
             "asw_score"=asw_score,
-            "ari"=ari_list,
-            "nmi"=nmi_list,
+            #"ari"=ari_list,
+            #"nmi"=nmi_list,
             "max_ari"=max_ari_list,
             "max_nmi"=max_nmi_list))
 }
@@ -748,11 +748,11 @@ NMI(cbind(1:length(cluster_label[,i]),cluster_label[,i]),cbind(1:length(cluster_
 #'
 evaluate_hvg_continuous<-function(pcalist,pro,
                                input="MultiomeATAC",dataset_name=NULL){
-    if(!is.null(dataset_name)){
-        cur_resolution=resolutionlist[[dataset_name]]
-    }else{
+    #if(!is.null(dataset_name)){
+    #    cur_resolution=resolutionlist[[dataset_name]]
+    #}else{
         cur_resolution=0.2
-    }
+    #}
     if (input == "CITEseq"){
         scale_pro<-CreateSeuratObject(pro,verbose=FALSE)
         scale_pro <- NormalizeData(scale_pro, normalization.method = "CLR", margin = 2,verbose=F)
@@ -781,11 +781,11 @@ evaluate_hvg_continuous<-function(pcalist,pro,
     # Within Between Cluster Variance Ratio
     message("var_ratio")
     variance_ratio<-rep(NA,Num_method)
-    max_variance_ratio<-rep(NA,Num_method)
+    #max_variance_ratio<-rep(NA,Num_method)
     for(i in 1:Num_method){
         if(Nosample){
             variance_ratio[i]<-within_between_var_ratio_continuous(pcalist[[i]],pro,cur_resolution)
-            max_variance_ratio[i]<-within_between_var_ratio_max_continuous(pcalist[[i]],pro)
+            #max_variance_ratio[i]<-within_between_var_ratio_max_continuous(pcalist[[i]],pro)
         }else{
             variance_ratio[i]<-(within_between_var_ratio_continuous(pcalist[[i]][index_sample_pca,],
                                                                     pro[,index_sample_pca],cur_resolution)+
@@ -793,12 +793,12 @@ evaluate_hvg_continuous<-function(pcalist,pro,
                                                                         pro[,index_sample_pca1],cur_resolution)+
                                     within_between_var_ratio_continuous(pcalist[[i]][index_sample_pca2,],
                                                                         pro[,index_sample_pca2],cur_resolution))/3
-            max_variance_ratio[i]<-(within_between_var_ratio_max_continuous(pcalist[[i]][index_sample_pca,],
-                                                                    pro[,index_sample_pca])+
-                                  within_between_var_ratio_max_continuous(pcalist[[i]][index_sample_pca1,],
-                                                                      pro[,index_sample_pca1])+
-                                  within_between_var_ratio_max_continuous(pcalist[[i]][index_sample_pca2,],
-                                                                      pro[,index_sample_pca2]))/3
+            #max_variance_ratio[i]<-(within_between_var_ratio_max_continuous(pcalist[[i]][index_sample_pca,],
+            #                                                        pro[,index_sample_pca])+
+            #                      within_between_var_ratio_max_continuous(pcalist[[i]][index_sample_pca1,],
+            #                                                          pro[,index_sample_pca1])+
+            #                      within_between_var_ratio_max_continuous(pcalist[[i]][index_sample_pca2,],
+            #                                                          pro[,index_sample_pca2]))/3
         }
     }
 
@@ -836,8 +836,8 @@ evaluate_hvg_continuous<-function(pcalist,pro,
     message("dist cor")
     dist_cor<-rep(NA,Num_method)
     # ASW
-    asw_score<-rep(NA,Num_method)
-    max_asw_score<-rep(NA,Num_method)
+    #asw_score<-rep(NA,Num_method)
+    #max_asw_score<-rep(NA,Num_method)
     if(!Nosample){
         set.seed(60)
         index_sample_pca<-sample(1:ncol(pro),size = 10000)
@@ -869,30 +869,28 @@ evaluate_hvg_continuous<-function(pcalist,pro,
 
     #######################################
     ## ARI,NMI
-    message("ari,nmi")
-    ari_list<-rep(NA,Num_method)
-    nmi_list<-rep(NA,Num_method)
-    if(!Nosample){
-        set.seed(80)
-        index_sample_pca<-sample(1:ncol(pro),size = 10000)
-        set.seed(90)
-        index_sample_pca1<-sample(1:ncol(pro),size = 10000)
-    }
-    if(Nosample){
-        for(i in 1:Num_method){
-            res<-ARI_NMI_func_continuous(pcalist[[i]],pro,cur_resolution)
-            ari_list[i]<-res[1]
-            nmi_list[i]<-res[2]
-        }
-    }else{
-        for(i in 1:Num_method){
-            res<-ARI_NMI_func_continuous(pcalist[[i]][index_sample_pca,],pro[,index_sample_pca],cur_resolution)
-            res1<-ARI_NMI_func_continuous(pcalist[[i]][index_sample_pca1,],pro[,index_sample_pca1],cur_resolution)
-            ari_list[i]<-(res[1]+res1[1])/2
-            nmi_list[i]<-(res[2]+res1[2])/2
-        }
-
-    }
+    #message("ari,nmi")
+    #ari_list<-rep(NA,Num_method)
+    #nmi_list<-rep(NA,Num_method)
+    #if(!Nosample){
+    #    set.seed(80)
+    #    index_sample_pca<-sample(1:ncol(pro),size = 10000)
+    #    set.seed(90)
+    ##    index_sample_pca1<-sample(1:ncol(pro),size = 10000)
+    #}
+    #if(Nosample){
+    #    for(i in 1:Num_method){
+    #        res<-ARI_NMI_func_continuous(pcalist[[i]],pro,cur_resolution)
+    #        ari_list[i]<-res[1]
+    #        nmi_list[i]<-res[2]
+    #    }
+    #}else{
+    #    for(i in 1:Num_method){
+    #        res<-ARI_NMI_func_continuous(pcalist[[i]][index_sample_pca,],pro[,index_sample_pca],cur_resolution)
+    #        res1<-ARI_NMI_func_continuous(pcalist[[i]][index_sample_pca1,],pro[,index_sample_pca1],cur_resolution)
+    #        ari_list[i]<-(res[1]+res1[1])/2
+    #        nmi_list[i]<-(res[2]+res1[2])/2
+    #    }}
 
 
     #######################################
@@ -925,26 +923,26 @@ evaluate_hvg_continuous<-function(pcalist,pro,
 
     newList<-list(
         "var_ratio"=variance_ratio,
-        "max_var_ratio"=max_variance_ratio,
+        #"max_var_ratio"=max_variance_ratio,
         "knn_ratio"=knnratio,
         "3nn"=nn_mse,
         "dist_cor"=dist_cor,
-        "asw_score"=asw_score,
-        "ari"=ari_list,
-        "nmi"=nmi_list,
-        "max_asw"=max_asw_score,
+        #"asw_score"=asw_score,
+        #"ari"=ari_list,
+        #"nmi"=nmi_list,
+        #"max_asw"=max_asw_score,
         "max_ari"=max_ari_list,
         "max_nmi"=max_nmi_list)
     return(newList)
 }
 
 # The resolution used for evaluation in all datasets
-
+if(0){
 resolutionlist = list()
 resolutionlist[["bmcite"]] = 0.1
-resolutionlist[["pbmc_cite"]] = 0.2
+resolutionlist[["pbmc_cite"]] = 0.1#0.2
 resolutionlist[["cbmc8k_cite"]] = 0.1
-resolutionlist[["FLiver_cite"]] = 0.05
+resolutionlist[["FLiver_cite"]] = 0.1#0.05
 resolutionlist[["FBM_cite"]] = 0.1
 resolutionlist[["seurat_cite"]] = 0.08
 resolutionlist[["sucovid_cite"]] = 0.3
@@ -953,19 +951,4 @@ resolutionlist[["lymphoma"]] = 0.05
 resolutionlist[["mus_brain5k"]] = 0.1
 resolutionlist[["pbmc3k_multi"]] = 0.1
 resolutionlist[["pbmc10k_multi"]] = 0.1
-
-resolutionlist = list()
-resolutionlist[["bmcite"]] = 0.1
-resolutionlist[["cbmc_pbmc"]] = 0.2
-resolutionlist[["cbmc8k"]] = 0.1
-resolutionlist[["CD34"]] = 0.05
-resolutionlist[["fetalBM"]] = 0.1
-resolutionlist[["seurat_cite"]] = 0.08
-resolutionlist[["Sucovid"]] = 0.3
-resolutionlist[["human_brain_3k"]] = 0.15
-resolutionlist[["lymphoma_14k"]] = 0.05
-resolutionlist[["mouse_brain_fresh_5k"]] = 0.1
-resolutionlist[["pbmc3k"]] = 0.1
-resolutionlist[["pbmc10k"]] = 0.1
-resolutionlist[["snare"]] = 0.1
-
+}
