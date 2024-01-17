@@ -116,7 +116,7 @@ ARI_NMI_func_Max<-function(
     c(max(res[1,]),max(res[2,]))
 }
 
-#' Criterion 2: Within VS Between Cell Type Variance Ratio
+#' Criterion 2: Between VS Within Cell Type Variance Ratio
 #' @details 2
 #'
 #' @param embedding embedding
@@ -128,7 +128,7 @@ ARI_NMI_func_Max<-function(
 #' @importFrom Rfast colVars
 #' @export
 #'
-within_between_var_ratio<-function(embedding,cell_label){
+between_within_var_ratio<-function(embedding,cell_label){
     cell_label <- as.character(cell_label)
     # sorted unique cluster label
     label_index<-sort(unique(as.character(cell_label)))
@@ -142,7 +142,7 @@ within_between_var_ratio<-function(embedding,cell_label){
         (length(index_i)-1)*colVars(embedding[index_i,])
     })
     all<-(sum(nrow(embedding)-1)*colVars(embedding))
-    sum(rowSums(within))/(sum(all)- sum(rowSums(within)))
+    (sum(all)- sum(rowSums(within)))/sum(rowSums(within))
 }
 
 #' Criterion 3: Nearest Neighbor Accuracy
@@ -189,7 +189,7 @@ knn_accuracy<-function(embedding,cell_label,k = 3){
 #'
 #' @export
 #'
-within_between_dist_ratio<-function(embedding,cell_label){
+between_within_dist_ratio<-function(embedding,cell_label){
     cell_label <- as.character(cell_label)
     # sorted unique cluster label
     label_index<-sort(unique(as.character(cell_label)))
@@ -212,7 +212,7 @@ within_between_dist_ratio<-function(embedding,cell_label){
         label_dist[id_k,id_k] = 0
     }
     pc_dist<-as.matrix(dist(embedding))
-    sum(pc_dist*(1-label_dist))/sum(pc_dist*label_dist)
+    sum(pc_dist*label_dist)/sum(pc_dist*(1-label_dist))
 }
 
 
@@ -271,7 +271,7 @@ asw_func<-function(
 #'
 #' @export
 #'
-evaluate_hvg_discrete<-function(pcalist,label){
+evaluate_hvg_discrete<-function(pcalist,label,verbose=T){
     Num_method<-length(pcalist)
     Nosample<-FALSE
     if(length(label)<10000){Nosample<-TRUE}
@@ -289,14 +289,16 @@ evaluate_hvg_discrete<-function(pcalist,label){
     variance_ratio<-rep(NA,Num_method)
     for(i in 1:Num_method){
         if(Nosample){
-            variance_ratio[i]<-within_between_var_ratio(pcalist[[i]],label)
+            variance_ratio[i]<-between_within_var_ratio(pcalist[[i]],label)
         }else{
             variance_ratio[i]<-
-                (within_between_var_ratio(pcalist[[i]][index_sample_pca,],label[index_sample_pca])+
-                     within_between_var_ratio(pcalist[[i]][index_sample_pca1,],label[index_sample_pca1]))/2
+                (between_within_var_ratio(pcalist[[i]][index_sample_pca,],label[index_sample_pca])+
+                     between_within_var_ratio(pcalist[[i]][index_sample_pca1,],label[index_sample_pca1]))/2
         }
     }
-
+    if(verbose){
+      print(variance_ratio)
+    }
     #if(!Nosample){
     #    set.seed(30)
     #    index_sample_pca<-createDataPartition(label,p = min(1,10000/length(label)))$Resample1
@@ -338,23 +340,14 @@ evaluate_hvg_discrete<-function(pcalist,label){
             max_nmi_list[i]<-(res_ari[2]+res_ari1[2])/2
         }
     }
+    if(verbose){
+      print("ari")
+      print(max_ari_list)
+      print("nmi")
+      print(max_nmi_list)
+    }
 
 
-    #################################################
-    # 3NN accuracy
-    message("3nn")
-    nn_acc<-rep(NA,Num_method)
-    if(!Nosample){
-        set.seed(50)
-        index_sample_pca<-createDataPartition(label,p = min(1,10000/length(label)))$Resample1
-    }
-    for(i in 1:Num_method){
-        if(Nosample){
-            nn_acc[i]<-knn_accuracy(pcalist[[i]],label)
-        }else{
-            nn_acc[i]<-knn_accuracy(pcalist[[i]][index_sample_pca,],label[index_sample_pca])
-        }
-    }
 
     #################################################
     # Distance Ratio
@@ -369,13 +362,14 @@ evaluate_hvg_discrete<-function(pcalist,label){
 
     #for(i in 1:Num_method){
     #    if(Nosample){
-    #        dist_ratio[i]<-within_between_dist_ratio(pcalist[[i]],label)
+    #        dist_ratio[i]<-between_within_dist_ratio(pcalist[[i]],label)
     #    }else{
     #        dist_ratio[i]<-
-    #            (within_between_dist_ratio(pcalist[[i]][index_sample_pca,],label[index_sample_pca])+
-    #                 within_between_dist_ratio(pcalist[[i]][index_sample_pca1,],label[index_sample_pca1]))/2
+    #            (between_within_dist_ratio(pcalist[[i]][index_sample_pca,],label[index_sample_pca])+
+    #                 between_within_dist_ratio(pcalist[[i]][index_sample_pca1,],label[index_sample_pca1]))/2
     #    }
     #}
+    message("lisi")
     lisi_score<-rep(NA,Num_method)
     if(!Nosample){
         set.seed(80)
@@ -393,7 +387,10 @@ evaluate_hvg_discrete<-function(pcalist,label){
                      lisi_score_func(pcalist[[i]][index_sample_pca1,],label[index_sample_pca1]))/2
         }
     }
-
+    if(verbose){
+      print(lisi_score)
+    }
+    message("asw")
     asw_score<-rep(NA,Num_method)
     if(!Nosample){
         set.seed(100)
@@ -410,8 +407,25 @@ evaluate_hvg_discrete<-function(pcalist,label){
                      asw_func(pcalist[[i]][index_sample_pca1,],label[index_sample_pca1]))/2
         }
     }
+    if(verbose){
+      print(asw_score)
+    }
 
-
+    #################################################
+    # 3NN accuracy
+    message("3nn")
+    nn_acc<-rep(NA,Num_method)
+    if(!Nosample){
+      set.seed(50)
+      index_sample_pca<-createDataPartition(label,p = min(1,10000/length(label)))$Resample1
+    }
+    for(i in 1:Num_method){
+      if(Nosample){
+        nn_acc[i]<-knn_accuracy(pcalist[[i]],label)
+      }else{
+        nn_acc[i]<-knn_accuracy(pcalist[[i]][index_sample_pca,],label[index_sample_pca])
+      }
+    }
     return(list(
             "var_ratio"=variance_ratio,
             #"ari"=ari_list,
@@ -439,7 +453,7 @@ evaluate_hvg_discrete<-function(pcalist,label){
 #'
 #' @export
 #'
-within_between_var_ratio_continuous<-function(
+between_within_var_ratio_continuous<-function(
         embedding,
         pro,
         resolution = 0.2){
@@ -463,7 +477,7 @@ within_between_var_ratio_continuous<-function(
         (length(index_i)-1)*rowVars(pro[,index_i])
     })
     all_var<-(ncol(pro)-1)*rowVars(pro)
-    var_r<-rowSums(within)/(all_var- rowSums(within))
+    var_r<-(all_var-rowSums(within))/rowSums(within)
     mean(var_r)
 }
 
@@ -481,7 +495,7 @@ within_between_var_ratio_continuous<-function(
 #'
 #' @export
 #'
-within_between_var_ratio_max_continuous<-function(
+between_within_var_ratio_max_continuous<-function(
     embedding,
     pro){
   snn_<- FindNeighbors(object = embedding,
@@ -506,7 +520,7 @@ within_between_var_ratio_max_continuous<-function(
       (length(index_i)-1)*rowVars(pro[,index_i])
     })
     all_var<-(ncol(pro)-1)*rowVars(pro)
-    var_r<-rowSums(within)/(all_var- rowSums(within))
+    var_r<-(all_var- rowSums(within))/rowSums(within)
     mean(var_r)
   })
   min(res)
@@ -572,8 +586,8 @@ knn_ratio_continuous<-function(embedding,pro,k = 100,
                     cl = rep(1,nrow(embedding)-1),
                     k = k,prob = T)
         nn_index<-c(1:nrow(embedding))[-cell][attr(ind,"nn.index")[1,]]
-        r<-mean(pdist(pro[cell,],pro[nn_index,])@dist)/
-            mean(pdist(pro[cell,],pro[-c(nn_index,cell),])@dist)
+        r<-mean(pdist(pro[cell,],pro[-c(nn_index,cell),])@dist)/
+          mean(pdist(pro[cell,],pro[nn_index,])@dist)
         r
     })
     mean(dist_ratio)
@@ -747,7 +761,8 @@ NMI(cbind(1:length(cluster_label[,i]),cluster_label[,i]),cbind(1:length(cluster_
 #' @export
 #'
 evaluate_hvg_continuous<-function(pcalist,pro,
-                               input="MultiomeATAC",dataset_name=NULL){
+                               input="MultiomeATAC",dataset_name=NULL,
+                               verbose=T){
     #if(!is.null(dataset_name)){
     #    cur_resolution=resolutionlist[[dataset_name]]
     #}else{
@@ -778,60 +793,33 @@ evaluate_hvg_continuous<-function(pcalist,pro,
     }
 
     #################################################
-    # Within Between Cluster Variance Ratio
+    # Between Within Cluster Variance Ratio
     message("var_ratio")
     variance_ratio<-rep(NA,Num_method)
     #max_variance_ratio<-rep(NA,Num_method)
     for(i in 1:Num_method){
         if(Nosample){
-            variance_ratio[i]<-within_between_var_ratio_continuous(pcalist[[i]],pro,cur_resolution)
-            #max_variance_ratio[i]<-within_between_var_ratio_max_continuous(pcalist[[i]],pro)
+            variance_ratio[i]<-between_within_var_ratio_continuous(pcalist[[i]],pro,cur_resolution)
+            #max_variance_ratio[i]<-between_within_var_ratio_max_continuous(pcalist[[i]],pro)
         }else{
-            variance_ratio[i]<-(within_between_var_ratio_continuous(pcalist[[i]][index_sample_pca,],
+            variance_ratio[i]<-(between_within_var_ratio_continuous(pcalist[[i]][index_sample_pca,],
                                                                     pro[,index_sample_pca],cur_resolution)+
-                                    within_between_var_ratio_continuous(pcalist[[i]][index_sample_pca1,],
+                                    between_within_var_ratio_continuous(pcalist[[i]][index_sample_pca1,],
                                                                         pro[,index_sample_pca1],cur_resolution)+
-                                    within_between_var_ratio_continuous(pcalist[[i]][index_sample_pca2,],
+                                    between_within_var_ratio_continuous(pcalist[[i]][index_sample_pca2,],
                                                                         pro[,index_sample_pca2],cur_resolution))/3
-            #max_variance_ratio[i]<-(within_between_var_ratio_max_continuous(pcalist[[i]][index_sample_pca,],
+            #max_variance_ratio[i]<-(between_within_var_ratio_max_continuous(pcalist[[i]][index_sample_pca,],
             #                                                        pro[,index_sample_pca])+
-            #                      within_between_var_ratio_max_continuous(pcalist[[i]][index_sample_pca1,],
+            #                      between_within_var_ratio_max_continuous(pcalist[[i]][index_sample_pca1,],
             #                                                          pro[,index_sample_pca1])+
-            #                      within_between_var_ratio_max_continuous(pcalist[[i]][index_sample_pca2,],
+            #                      between_within_var_ratio_max_continuous(pcalist[[i]][index_sample_pca2,],
             #                                                          pro[,index_sample_pca2]))/3
         }
     }
-
-    #################################################
-    # Within Nearest Neighbor VS Out of Nearest Neighbor Distance Ratio
-    message("knn_ratio")
-    knnratio<-rep(NA,Num_method)
-
-    if(!Nosample){
-        set.seed(40)
-        index_sample_pca<-sample(1:ncol(pro),size = 10000)
-    }else{
-       index_sample_pca<-1:ncol(pro)
+    if(verbose){
+      print(variance_ratio)
     }
 
-    for(i in 1:Num_method){
-        knnratio[i]<-knn_ratio_continuous(pcalist[[i]][index_sample_pca,],pro[,index_sample_pca])
-    }
-
-
-    #################################################
-    # 3NN Regression MSE
-    message("3nn")
-    nn_mse<-rep(NA,Num_method)
-    if(!Nosample){
-        set.seed(50)
-        index_sample_pca<-sample(1:ncol(pro),size = 10000)
-    }
-    for(i in 1:Num_method){
-        nn_mse[i]<-knn_regression_continuous(pcalist[[i]][index_sample_pca,],pro[,index_sample_pca])
-    }
-
-    #################################################
     # Distance Correlation
     message("dist cor")
     dist_cor<-rep(NA,Num_method)
@@ -866,7 +854,9 @@ evaluate_hvg_continuous<-function(pcalist,pro,
             #                 asw_max_func_continuous(pcalist[[i]][index_sample_pca1,],pro_dist1))/2
         }
     }
-
+    if(verbose){
+      print(dist_cor)
+    }
     #######################################
     ## ARI,NMI
     #message("ari,nmi")
@@ -918,9 +908,50 @@ evaluate_hvg_continuous<-function(pcalist,pro,
             max_nmi_list[i]<-(res[2]+res1[2])/2
         }
     }
+    if(verbose){
+      print("ari")
+      print(max_ari_list)
+      print("nmi")
+      print(max_nmi_list)
+    }
 
 
+    #################################################
+    # Within Nearest Neighbor VS Out of Nearest Neighbor Distance Ratio
+    message("knn_ratio")
+    knnratio<-rep(NA,Num_method)
 
+    if(!Nosample){
+      set.seed(40)
+      index_sample_pca<-sample(1:ncol(pro),size = 10000)
+    }else{
+      index_sample_pca<-1:ncol(pro)
+    }
+
+    for(i in 1:Num_method){
+      knnratio[i]<-knn_ratio_continuous(pcalist[[i]][index_sample_pca,],pro[,index_sample_pca])
+    }
+
+    if(verbose){
+      print(knnratio)
+    }
+
+    #################################################
+    # 3NN Regression MSE
+    message("3nn")
+    nn_mse<-rep(NA,Num_method)
+    if(!Nosample){
+      set.seed(50)
+      index_sample_pca<-sample(1:ncol(pro),size = 10000)
+    }
+    for(i in 1:Num_method){
+      nn_mse[i]<-knn_regression_continuous(pcalist[[i]][index_sample_pca,],pro[,index_sample_pca])
+    }
+
+    if(verbose){
+      print(nn_mse)
+    }
+    #################################################
     newList<-list(
         "var_ratio"=variance_ratio,
         #"max_var_ratio"=max_variance_ratio,
