@@ -105,7 +105,7 @@ ARI_NMI_func_Max<-function(
                          verbose = F)$snn
     Nresolution=20
     #resolution_range=exp(seq(log(0.01),log(1),(log(1)-log(0.01))/Nresolution))
-    resolution_range=seq(0.1,2,0.1)
+    resolution_range=seq(0,2,0.1)
     res<-sapply(resolution_range,function(cur_resolution){
         cluster_label <- FindClusters(snn_,
                                       resolution = cur_resolution,
@@ -299,30 +299,35 @@ evaluate_hvg_discrete<-function(pcalist,label,verbose=T){
     if(verbose){
       print(variance_ratio)
     }
-    #if(!Nosample){
-    #    set.seed(30)
-    #    index_sample_pca<-createDataPartition(label,p = min(1,10000/length(label)))$Resample1
-    #    set.seed(40)
-    #    index_sample_pca1<-createDataPartition(label,p = min(1,10000/length(label)))$Resample1
-    #}
+    if(!Nosample){
+        set.seed(30)
+        index_sample_pca<-createDataPartition(label,p = min(1,10000/length(label)))$Resample1
+        set.seed(40)
+        index_sample_pca1<-createDataPartition(label,p = min(1,10000/length(label)))$Resample1
+    }
     #################################################
     # ARI with Louvain clustering with the closest cell type number
-    #message("ari_nmi_louvain")
-    #ari_list<-rep(NA,Num_method)
-    #nmi_list<-rep(NA,Num_method)
-    #for(i in 1:Num_method){
-    #    if(Nosample){
-    #        res_ari=ARI_NMI_func(pcalist[[i]],label)
-    #        ari_list[i]<-res_ari[2]
-    #        nmi_list[i]<-res_ari[3]
-    #    }else{
-    #        res_ari=ARI_NMI_func(pcalist[[i]][index_sample_pca,],label[index_sample_pca])
-    #        res_ari1=ARI_NMI_func(pcalist[[i]][index_sample_pca1,],label[index_sample_pca1])
-    #        ari_list[i]<-(res_ari[2]+res_ari1[2])/2
-    #        nmi_list[i]<-(res_ari[3]+res_ari1[3])/2
-    #    }
-    #}
-
+    message("ari_nmi_louvain")
+    ari_list<-rep(NA,Num_method)
+    nmi_list<-rep(NA,Num_method)
+    for(i in 1:Num_method){
+        if(Nosample){
+            res_ari=ARI_NMI_func(pcalist[[i]],label)
+            ari_list[i]<-res_ari[2]
+            nmi_list[i]<-res_ari[3]
+        }else{
+            res_ari=ARI_NMI_func(pcalist[[i]][index_sample_pca,],label[index_sample_pca])
+            res_ari1=ARI_NMI_func(pcalist[[i]][index_sample_pca1,],label[index_sample_pca1])
+            ari_list[i]<-(res_ari[2]+res_ari1[2])/2
+            nmi_list[i]<-(res_ari[3]+res_ari1[3])/2
+        }
+    }
+    if(verbose){
+      print("ariset")
+      print(ari_list)
+      print("nmiset")
+      print(nmi_list)
+    }
     #################################################
     # ARI with Louvain clustering with the best number
     message("ari_nmi_max")
@@ -426,6 +431,9 @@ evaluate_hvg_discrete<-function(pcalist,label,verbose=T){
         nn_acc[i]<-knn_accuracy(pcalist[[i]][index_sample_pca,],label[index_sample_pca])
       }
     }
+    if(verbose){
+      print(nn_acc)
+    }
     return(list(
             "var_ratio"=variance_ratio,
             #"ari"=ari_list,
@@ -433,8 +441,8 @@ evaluate_hvg_discrete<-function(pcalist,label,verbose=T){
             #"dist_ratio"=dist_ratio,
             "lisi"=lisi_score,
             "asw_score"=asw_score,
-            #"ari"=ari_list,
-            #"nmi"=nmi_list,
+            "ari"=ari_list,
+            "nmi"=nmi_list,
             "max_ari"=max_ari_list,
             "max_nmi"=max_nmi_list))
 }
@@ -503,7 +511,7 @@ between_within_var_ratio_max_continuous<-function(
                        verbose = F)$snn
   Nresolution=20
   #resolution_range=exp(seq(log(0.01),log(1),(log(1)-log(0.01))/Nresolution))
-  resolution_range=seq(0.1,2,0.1)
+  resolution_range=seq(0,2,0.1)
   res<-sapply(resolution_range, function(cur_resolution){
     cluster_label <- FindClusters(snn_,
                                   resolution = cur_resolution,
@@ -645,7 +653,7 @@ asw_max_func_continuous<-function(
                        verbose = F)$snn
   Nresolution=20
   #resolution_range=exp(seq(log(0.01),log(1),(log(1)-log(0.01))/Nresolution))
-  resolution_range=seq(0.1,2,0.1)
+  resolution_range=seq(0,2,0.1)
   res_<-sapply(resolution_range, function(cur_resolution){
     cluster_label <- FindClusters(snn_,
                                   resolution = cur_resolution,
@@ -712,7 +720,7 @@ ARI_NMI_func_Max_continuous<-function(
         pro){
     Nresolution=20
     #resolution_range=exp(seq(log(0.01),log(1),(log(1)-log(0.01))/Nresolution))
-    resolution_range=seq(0.1,2,0.1)
+    resolution_range=seq(0,2,0.1)
     snn_<- FindNeighbors(object = embedding,
                          nn.method = "rann",
                          verbose = F)$snn
@@ -983,3 +991,119 @@ resolutionlist[["mus_brain5k"]] = 0.1
 resolutionlist[["pbmc3k_multi"]] = 0.1
 resolutionlist[["pbmc10k_multi"]] = 0.1
 }
+
+
+evaluate_hvg_dist<-function(pcalist,pro,
+                            input="MultiomeATAC",dataset_name=NULL,
+                            verbose=T){
+  #if(!is.null(dataset_name)){
+  #    cur_resolution=resolutionlist[[dataset_name]]
+  #}else{
+  cur_resolution=0.2
+  #}
+  if (input == "CITEseq"){
+    scale_pro<-CreateSeuratObject(pro,verbose=FALSE)
+    scale_pro <- NormalizeData(scale_pro, normalization.method = "CLR", margin = 2,verbose=F)
+    scale_pro <- ScaleData(scale_pro,verbose=FALSE)
+    pro <- scale_pro@assays$RNA@scale.data
+  }
+  Num_method<-length(pcalist)
+  Nosample<-FALSE
+  if(ncol(pro)>10000){
+    set.seed(10)
+    index_sample_pca<-sample(1:ncol(pro),size = 10000)
+    set.seed(20)
+    index_sample_pca1<-sample(1:ncol(pro),size = 10000)
+    set.seed(30)
+    index_sample_pca2<-sample(1:ncol(pro),size = 10000)
+  }else{
+    index_sample_pca<-1:ncol(pro)
+    Nosample<-TRUE
+  }
+
+  if(input == "MultiomeATAC"){
+    Nosample<-TRUE
+  }
+
+  #################################################
+  # Between Within Cluster Variance Ratio
+  message("var_ratio")
+  variance_ratio<-rep(NA,Num_method)
+  #max_variance_ratio<-rep(NA,Num_method)
+  for(i in 1:Num_method){
+    if(Nosample){
+      variance_ratio[i]<-between_within_var_ratio_continuous(pcalist[[i]],pro,cur_resolution)
+      #max_variance_ratio[i]<-between_within_var_ratio_max_continuous(pcalist[[i]],pro)
+    }else{
+      variance_ratio[i]<-(between_within_var_ratio_continuous(pcalist[[i]][index_sample_pca,],
+                                                              pro[,index_sample_pca],cur_resolution)+
+                            between_within_var_ratio_continuous(pcalist[[i]][index_sample_pca1,],
+                                                                pro[,index_sample_pca1],cur_resolution)+
+                            between_within_var_ratio_continuous(pcalist[[i]][index_sample_pca2,],
+                                                                pro[,index_sample_pca2],cur_resolution))/3
+      #max_variance_ratio[i]<-(between_within_var_ratio_max_continuous(pcalist[[i]][index_sample_pca,],
+      #                                                        pro[,index_sample_pca])+
+      #                      between_within_var_ratio_max_continuous(pcalist[[i]][index_sample_pca1,],
+      #                                                          pro[,index_sample_pca1])+
+      #                      between_within_var_ratio_max_continuous(pcalist[[i]][index_sample_pca2,],
+      #                                                          pro[,index_sample_pca2]))/3
+    }
+  }
+  if(verbose){
+    print(variance_ratio)
+  }
+
+  # Distance Correlation
+  message("dist cor")
+  dist_cor<-rep(NA,Num_method)
+  # ASW
+  #asw_score<-rep(NA,Num_method)
+  #max_asw_score<-rep(NA,Num_method)
+  if(!Nosample){
+    set.seed(60)
+    index_sample_pca<-sample(1:ncol(pro),size = 10000)
+    set.seed(70)
+    index_sample_pca1<-sample(1:ncol(pro),size = 10000)
+  }
+
+  if(Nosample){
+    pro_dist<-dist(t(pro))
+    for(i in 1:Num_method){
+      pc_dist<-dist(pcalist[[i]])
+      dist_cor[i]<-cor(c(pro_dist),c(pc_dist))
+      #asw_score[i]<-asw_func_continuous(pcalist[[i]],pro_dist,cur_resolution)
+      #max_asw_score[i]<-asw_max_func_continuous(pcalist[[i]],pro_dist)
+    }
+  }else{
+    pro_dist<-dist(t(pro[,index_sample_pca]))
+    pro_dist1<-dist(t(pro[,index_sample_pca1]))
+    for(i in 1:Num_method){
+      pc_dist<-dist(pcalist[[i]][index_sample_pca,])
+      pc_dist1<-dist(pcalist[[i]][index_sample_pca1,])
+      dist_cor[i]<-(cor(c(pro_dist),c(pc_dist))+cor(c(pro_dist1),c(pc_dist1)))/2
+      #asw_score[i]<-(asw_func_continuous(pcalist[[i]][index_sample_pca,],pro_dist,cur_resolution)+
+      #                   asw_func_continuous(pcalist[[i]][index_sample_pca1,],pro_dist1,cur_resolution))/2
+      #max_asw_score[i]<-(asw_max_func_continuous(pcalist[[i]][index_sample_pca,],pro_dist)+
+      #                 asw_max_func_continuous(pcalist[[i]][index_sample_pca1,],pro_dist1))/2
+    }
+  }
+  if(verbose){
+    print(dist_cor)
+  }
+
+  #################################################
+  newList<-list(
+    "var_ratio"=variance_ratio,
+    #"max_var_ratio"=max_variance_ratio,
+    #"knn_ratio"=knnratio,
+    #"3nn"=nn_mse,
+    "dist_cor"=dist_cor)#,
+  #"asw_score"=asw_score,
+  #"ari"=ari_list,
+  #"nmi"=nmi_list,
+  #"max_asw"=max_asw_score,
+  #"max_ari"=max_ari_list,
+  #"max_nmi"=max_nmi_list)
+  return(newList)
+}
+
