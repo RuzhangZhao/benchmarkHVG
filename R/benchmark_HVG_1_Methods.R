@@ -51,7 +51,7 @@ hvg_pca<-function(rna_mat,
 
     hvg<-sample(rownames(rna_mat)[which(Matrix::rowSums(rna_mat)>0)],nfeatures)
 
-    seurat.obj1<-CreateSeuratObject(rna_mat,verbose = F)
+    seurat.obj1<-CreateSeuratObject(rna_mat)
     seurat.obj1<-NormalizeData(seurat.obj1,verbose = F)
     VariableFeatures(seurat.obj1)<-hvg
     seurat.obj1<-ScaleData(seurat.obj1,verbose = F)
@@ -63,7 +63,7 @@ hvg_pca<-function(rna_mat,
 
     ######## 2. Most original var count ~ mean count
     message("Method2: mv_ct")
-    seurat.obj2<-CreateSeuratObject(rna_mat,verbose = F)
+    seurat.obj2<-CreateSeuratObject(rna_mat)
     seurat.obj2<-NormalizeData(seurat.obj2,verbose = F)
 
     #sce <- SingleCellExperiment(list(counts=rna_mat))
@@ -84,7 +84,7 @@ hvg_pca<-function(rna_mat,
     #################################################
     #3.original normalized selection: var(normalized)~mean(normalized)
     message("Method3: mv_nc")
-    seurat.obj3<-CreateSeuratObject(rna_mat,verbose = F)
+    seurat.obj3<-CreateSeuratObject(rna_mat)
     seurat.obj3<-NormalizeData(seurat.obj3,verbose = F)
 
     #rna_mat_norm<-seurat.obj3@assays$RNA@data
@@ -110,7 +110,7 @@ hvg_pca<-function(rna_mat,
     message("Method4: scran")
     ## scran
 
-    seurat.obj4<-CreateSeuratObject(rna_mat,verbose = F)
+    seurat.obj4<-CreateSeuratObject(rna_mat)
     seurat.obj4<-NormalizeData(seurat.obj4,verbose = F)
 
 
@@ -138,7 +138,7 @@ hvg_pca<-function(rna_mat,
     #5.PFlog1pPF selection: var(PFlog1pPF)~mean(PFlog1pPF)
     message("Method5: mv_PFlogPF")
 
-    seurat.obj5<-CreateSeuratObject(rna_mat,verbose = F)
+    seurat.obj5<-CreateSeuratObject(rna_mat)
     seurat.obj5<-NormalizeData(seurat.obj5,verbose = F)
 
     #library(scran)
@@ -162,7 +162,7 @@ hvg_pca<-function(rna_mat,
     #################################################
     #6.seurat selection: log(var(count))~log(mean(count))
     message("Method6: seuratv3")
-    seurat.obj6<-CreateSeuratObject(rna_mat,verbose = F)
+    seurat.obj6<-CreateSeuratObject(rna_mat)
     seurat.obj6<-NormalizeData(seurat.obj6,verbose = F)
     seurat.obj6<-FindVariableFeaturesMix(seurat.obj6,method.names = "seuratv3",nfeatures = nfeatures)
     #seurat.obj6<-FindVariableFeatures(seurat.obj6,nfeatures=nfeatures,verbose = F)
@@ -176,7 +176,7 @@ hvg_pca<-function(rna_mat,
     #################################################
     #7.normalized selection: log(var(normalized))~log(mean(normalized))
     message("Method7: logmv_nc")
-    seurat.obj7<-CreateSeuratObject(rna_mat,verbose = F)
+    seurat.obj7<-CreateSeuratObject(rna_mat)
     seurat.obj7<-NormalizeData(seurat.obj7,verbose = F)
 
     #seurat.obj7@assays$RNA@counts<-seurat.obj7@assays$RNA@data
@@ -196,7 +196,7 @@ hvg_pca<-function(rna_mat,
     #8.log-normalized selection: log(var(log1p(normalized)))~log(mean(log1p(normalized)))
     message("Method8: logmv_lognc")
 
-    seurat.obj8<-CreateSeuratObject(rna_mat,verbose = F)
+    seurat.obj8<-CreateSeuratObject(rna_mat)
     seurat.obj8<-NormalizeData(seurat.obj8,verbose = F)
 
     #seurat.obj8@assays$RNA@counts<-seurat.obj8@assays$RNA@data
@@ -215,7 +215,7 @@ hvg_pca<-function(rna_mat,
     #9.log-PFlog1pPF selection : log(var(PFlog1pPF))~log(mean(PFlog1pPF))
     message("Method9: logmv_PFlogPF")
 
-    seurat.obj9<-CreateSeuratObject(rna_mat,verbose = F)
+    seurat.obj9<-CreateSeuratObject(rna_mat)
     #tmp<-seurat.obj9@assays$RNA@counts
     #seurat.obj9@assays$RNA@counts<-rna_mat_PFlog1pPF
     #seurat.obj9<-FindVariableFeatures(seurat.obj9,nfeatures=nfeatures,verbose = F)
@@ -236,7 +236,7 @@ hvg_pca<-function(rna_mat,
     message("Method10: scran_pos")
     ## scran
 
-    seurat.obj10<-CreateSeuratObject(rna_mat,verbose = F)
+    seurat.obj10<-CreateSeuratObject(rna_mat)
     seurat.obj10<-NormalizeData(seurat.obj10,verbose = F)
 
     #library(scran)
@@ -261,7 +261,7 @@ hvg_pca<-function(rna_mat,
     #################################################
     #11.dispersion
     message("Method11: dispersion count")
-    seurat.obj11<-CreateSeuratObject(rna_mat,verbose = F)
+    seurat.obj11<-CreateSeuratObject(rna_mat)
     seurat.obj11<-NormalizeData(seurat.obj11,verbose = F)
     seurat.obj11<-FindVariableFeaturesMix(seurat.obj11,method.names = "disp_ct",nfeatures = nfeatures,verbose = F)
     seurat.obj11<-ScaleData(seurat.obj11,verbose = F)
@@ -275,7 +275,7 @@ hvg_pca<-function(rna_mat,
     #################################################
     #12.Seurat v1
     message("Method12: Seurat v1, disp_nc")
-    seurat.obj12<-CreateSeuratObject(rna_mat,verbose = F)
+    seurat.obj12<-CreateSeuratObject(rna_mat)
     seurat.obj12<-NormalizeData(seurat.obj12,verbose = F)
     seurat.obj12<-FindVariableFeatures(seurat.obj12,nfeatures=nfeatures,verbose = F,selection.method = "disp")
     seurat.obj12<-ScaleData(seurat.obj12,verbose = F)
@@ -290,7 +290,7 @@ hvg_pca<-function(rna_mat,
     #13.seurat
     message("Method13: seuratv2")
     ## seurat mvp
-    seurat.obj13<-CreateSeuratObject(rna_mat,verbose = F)
+    seurat.obj13<-CreateSeuratObject(rna_mat)
     seurat.obj13<-NormalizeData(seurat.obj13,verbose = F)
     seurat.obj13<-FindVariableFeatures(seurat.obj13,nfeatures=nfeatures,verbose = F,selection.method = "mvp")
     seurat.obj13<-ScaleData(seurat.obj13,verbose = F)
@@ -304,7 +304,7 @@ hvg_pca<-function(rna_mat,
     #################################################
     #14.dispersion lognc
     message("Method14: dispersion lognc")
-    seurat.obj14<-CreateSeuratObject(rna_mat,verbose = F)
+    seurat.obj14<-CreateSeuratObject(rna_mat)
     seurat.obj14<-NormalizeData(seurat.obj14,verbose = F)
     seurat.obj14<-FindVariableFeaturesMix(seurat.obj14,method.names = "disp_lognc",nfeatures = nfeatures,verbose = F)
     seurat.obj14<-ScaleData(seurat.obj14,verbose = F)
@@ -318,7 +318,7 @@ hvg_pca<-function(rna_mat,
     #################################################
     #15.dispersion PFlogPF
     message("Method15: dispersion PFlogPF")
-    seurat.obj15<-CreateSeuratObject(rna_mat,verbose = F)
+    seurat.obj15<-CreateSeuratObject(rna_mat)
     seurat.obj15<-NormalizeData(seurat.obj15,verbose = F)
     seurat.obj15<-FindVariableFeaturesMix(seurat.obj15,method.names = "disp_PFlogPF",nfeatures = nfeatures,verbose = F)
     seurat.obj15<-ScaleData(seurat.obj15,verbose = F)
@@ -333,8 +333,9 @@ hvg_pca<-function(rna_mat,
     #################################################
     #16.cell ranger selection (dispersion based, scanpy):
     message("Method16: cell ranger")
-    sc = import("scanpy")
-    seurat.obj16<-CreateSeuratObject(rna_mat,verbose = F)
+    if(0){
+        sc = import("scanpy")
+    seurat.obj16<-CreateSeuratObject(rna_mat)
     scanpy_rna=sc$AnnData(t(as.matrix(seurat.obj16@assays$RNA@counts)))
     scanpy_rna$obs_names = as.character(1:ncol(rna_mat))
     scanpy_rna$var_names = rownames(rna_mat)
@@ -358,12 +359,14 @@ hvg_pca<-function(rna_mat,
     var.seurat.obj[[16]]<-VariableFeatures(seurat.obj16)
     rm(seurat.obj16)
     rm(scanpy_rna)
-
+    }
+    seurat.obj.pca[[16]]<-seurat.obj.pca[[15]]
+    var.seurat.obj[[16]]<-var.seurat.obj[[15]]
 
     #################################################
     #17.highly expressed genes
     message("Method17: mean_max_ct")
-    seurat.obj17<-CreateSeuratObject(rna_mat,verbose = F)
+    seurat.obj17<-CreateSeuratObject(rna_mat)
     seurat.obj17<-NormalizeData(seurat.obj17,verbose = F)
     seurat.obj17<-FindVariableFeaturesMix(seurat.obj17,method.names = "mean_max_ct",nfeatures = nfeatures,verbose = F)
     seurat.obj17<-ScaleData(seurat.obj17,verbose = F)
@@ -377,7 +380,7 @@ hvg_pca<-function(rna_mat,
     #################################################
     #18.highly expressed genes normalized count
     message("Method18: mean_max_nc")
-    seurat.obj18<-CreateSeuratObject(rna_mat,verbose = F)
+    seurat.obj18<-CreateSeuratObject(rna_mat)
     seurat.obj18<-NormalizeData(seurat.obj18,verbose = F)
     seurat.obj18<-FindVariableFeaturesMix(seurat.obj18,method.names = "mean_max_nc",nfeatures = nfeatures,verbose = F)
     seurat.obj18<-ScaleData(seurat.obj18,verbose = F)
@@ -392,7 +395,7 @@ hvg_pca<-function(rna_mat,
     #################################################
     #19.highly expressed genes log normalized count
     message("Method19: mean_max_lognc")
-    seurat.obj19<-CreateSeuratObject(rna_mat,verbose = F)
+    seurat.obj19<-CreateSeuratObject(rna_mat)
     seurat.obj19<-NormalizeData(seurat.obj19,verbose = F)
     seurat.obj19<-FindVariableFeaturesMix(seurat.obj19,method.names = "mean_max_lognc",nfeatures = nfeatures,verbose = F)
     seurat.obj19<-ScaleData(seurat.obj19,verbose = F)
@@ -406,7 +409,7 @@ hvg_pca<-function(rna_mat,
     #################################################
     #20.highly expressed genes PFlogPF
     message("Method20: mean_max_PFlogPF")
-    seurat.obj20<-CreateSeuratObject(rna_mat,verbose = F)
+    seurat.obj20<-CreateSeuratObject(rna_mat)
     seurat.obj20<-NormalizeData(seurat.obj20,verbose = F)
     seurat.obj20<-FindVariableFeaturesMix(seurat.obj20,method.names = "mean_max_PFlogPF",nfeatures = nfeatures,verbose = F)
     seurat.obj20<-ScaleData(seurat.obj20,verbose = F)
@@ -421,7 +424,7 @@ hvg_pca<-function(rna_mat,
       #################################################
       #21.Seurat SCT
       message("Method21: SCT")
-      seurat.obj21<-CreateSeuratObject(rna_mat,verbose = F)
+      seurat.obj21<-CreateSeuratObject(rna_mat)
       seurat.obj21<-SCTransform(seurat.obj21,variable.features.n=2000,verbose = F)
       seurat.obj21<-RunPCA(seurat.obj21,npcs=30,verbose=F)
 
@@ -474,7 +477,7 @@ mixture_hvg_pca<-function(rna_mat,
     print(i)
     index = mixture_index_list[[i]]
     print(index)
-    seurat.obj1<-CreateSeuratObject(rna_mat,verbose = F)
+    seurat.obj1<-CreateSeuratObject(rna_mat)
     seurat.obj1<-NormalizeData(seurat.obj1,verbose = F)
     seurat.obj1<-FindVariableFeaturesMix(seurat.obj1,method.names = method_list[index],nfeatures = nfeatures,verbose = F)
     seurat.obj1<-ScaleData(seurat.obj1,verbose = F)
@@ -531,14 +534,14 @@ mixture_hvg_pca0<-function(rna_mat,
     rm(sce)
     rm(dec)
 
-    seurat.obj1<-CreateSeuratObject(rna_mat,verbose = F)
+    seurat.obj1<-CreateSeuratObject(rna_mat)
     seurat.obj1<-NormalizeData(seurat.obj1,verbose = F)
     seurat.obj1<-FindVariableFeatures(seurat.obj1,nfeatures=nfeatures,verbose = F)
     v_seuratv3<-seurat.obj1@assays$RNA@meta.features$vst.variance.standardized
 
     v_maxct<-rowMeans(seurat.obj1@assays$RNA@data)
     rm(seurat.obj1)
-    seurat.obj11<-CreateSeuratObject(rna_mat,verbose = F)
+    seurat.obj11<-CreateSeuratObject(rna_mat)
     seurat.obj11<-NormalizeData(seurat.obj11,verbose = F)
     seurat.obj11<-FindVariableFeatures(seurat.obj11,nfeatures=nfeatures,verbose = F,selection.method = "disp")
     v_disp<-seurat.obj11@assays$RNA@meta.features$mvp.dispersion
@@ -546,7 +549,7 @@ mixture_hvg_pca0<-function(rna_mat,
     v_disp[v_disp<0]<-0
     rm(seurat.obj11)
 
-    seurat.obj10<-CreateSeuratObject(rna_mat,verbose = F)
+    seurat.obj10<-CreateSeuratObject(rna_mat)
     seurat.obj10<-NormalizeData(seurat.obj10,verbose = F)
     rna_mat_norm<-seurat.obj10@assays$RNA@data
     rna_mat_norm@x<-exp(rna_mat_norm@x)-1
