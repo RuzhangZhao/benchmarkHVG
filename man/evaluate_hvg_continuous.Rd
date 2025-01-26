@@ -9,7 +9,8 @@ evaluate_hvg_continuous(
   pcalist,
   pro,
   input = "MultiomeATAC",
-  dataset_name = NULL
+  dataset_name = NULL,
+  verbose = T
 )
 }
 \arguments{
@@ -20,6 +21,8 @@ evaluate_hvg_continuous(
 \item{input}{input type}
 
 \item{dataset_name}{dataset_name}
+
+\item{verbose}{verbose}
 }
 \value{
 var_ratio

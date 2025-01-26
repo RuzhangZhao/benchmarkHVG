@@ -4,12 +4,14 @@
 \alias{evaluate_hvg_discrete}
 \title{Comprehensive Evaluation for cell sorting.}
 \usage{
-evaluate_hvg_discrete(pcalist, label)
+evaluate_hvg_discrete(pcalist, label, verbose = T)
 }
 \arguments{
 \item{pcalist}{pcalist}
 
 \item{label}{label}
+
+\item{verbose}{verbose}
 }
 \value{
 var_ratio

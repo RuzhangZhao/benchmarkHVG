@@ -261,6 +261,7 @@ asw_func<-function(
 #'
 #' @param pcalist pcalist
 #' @param label label
+#' @param verbose verbose
 #'
 #' @importFrom caret createDataPartition
 #' @return var_ratio
@@ -757,6 +758,7 @@ NMI(cbind(1:length(cluster_label[,i]),cluster_label[,i]),cbind(1:length(cluster_
 #' @param pro protein
 #' @param input input type
 #' @param dataset_name dataset_name
+#' @param verbose verbose
 #'
 #' @import Seurat
 #' @importFrom stats cor dist
