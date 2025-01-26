@@ -203,7 +203,6 @@ between_within_dist_ratio<-function(embedding,cell_label){
         cell_label<-cell_label[ids]
     }
 
-
     cell_label_unique<-unique(cell_label)
     ncell = length(cell_label)
     label_dist = matrix(1,ncell,ncell)
