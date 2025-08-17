@@ -467,17 +467,19 @@ hvg_pca<-function(rna_mat,
 mixture_hvg_pca<-function(rna_mat,
                           nfeatures = 2000,
                           method_list=c("mv_lognc","logmv_lognc","scran_pos","seuratv1","mean_max_nc"),
-                          extra.rank = NULL
+                          extra.rank = NULL,
+                          mixture_index_list = NULL,
                           ){
 
   seurat.obj.pca<-list()
   var.seurat.obj<-list()
-
-  mixture_index_list<-list(c(1,2),c(1,3),c(1,4),c(1,5),c(2,3),c(2,4),c(2,5),c(3,4),c(3,5),c(4,5),
-                           c(1,2,3),c(1,2,4),c(1,2,5),c(1,3,4),c(1,3,5),c(1,4,5),
-                           c(2,3,4),c(2,3,5),c(2,4,5),c(3,4,5),
-                           c(1,2,3,4),c(1,2,3,5),c(1,2,4,5),c(1,3,4,5),c(2,3,4,5),
-                           c(1,2,3,4,5))
+  if (is.null(mixture_index_list)){
+    mixture_index_list<-list(c(1,2),c(1,3),c(1,4),c(1,5),c(2,3),c(2,4),c(2,5),c(3,4),c(3,5),c(4,5),
+                             c(1,2,3),c(1,2,4),c(1,2,5),c(1,3,4),c(1,3,5),c(1,4,5),
+                             c(2,3,4),c(2,3,5),c(2,4,5),c(3,4,5),
+                             c(1,2,3,4),c(1,2,3,5),c(1,2,4,5),c(1,3,4,5),c(2,3,4,5),
+                             c(1,2,3,4,5))
+  }
 
   for( i in 1:length(mixture_index_list) ){
     print(i)
