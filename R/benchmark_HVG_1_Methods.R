@@ -34,7 +34,9 @@
 #' }
 #'
 hvg_pca<-function(rna_mat,
-                  nfeatures = 2000,SCT=TRUE){
+                  nfeatures = 2000,
+
+                  SCT=TRUE){
     rna_mat_PFlog1pPF<-NormalizeData(rna_mat,scale.factor=mean(Matrix::colSums(rna_mat)),verbose=F)
     rna_mat_PFlog1pPF<-NormalizeData(rna_mat_PFlog1pPF,scale.factor=mean(Matrix::colSums(rna_mat_PFlog1pPF)),normalization.method = "RC",verbose=F)
 
@@ -72,7 +74,9 @@ hvg_pca<-function(rna_mat,
     #top.hvgs <- getTopHVGs(dec, n=2000)
     #rm(sce)
     #VariableFeatures(seurat.obj2)<-top.hvgs
-    seurat.obj2<-FindVariableFeaturesMix(seurat.obj2,method.names = "mv_ct",nfeatures = nfeatures)
+    seurat.obj2<-FindVariableFeaturesMix(seurat.obj2,
+                                         method.names = "mv_ct",
+                                         nfeatures = nfeatures)
     seurat.obj2<-ScaleData(seurat.obj2,verbose = F)
     seurat.obj2<-RunPCA(seurat.obj2,npcs=30,verbose=F)
 
@@ -462,7 +466,9 @@ hvg_pca<-function(rna_mat,
 #'
 mixture_hvg_pca<-function(rna_mat,
                           nfeatures = 2000,
-                          method_list=c("mv_lognc","logmv_lognc","scran_pos","seuratv1","mean_max_nc")){
+                          method_list=c("mv_lognc","logmv_lognc","scran_pos","seuratv1","mean_max_nc"),
+                          extra.rank = NULL
+                          ){
 
   seurat.obj.pca<-list()
   var.seurat.obj<-list()
@@ -479,7 +485,11 @@ mixture_hvg_pca<-function(rna_mat,
     print(index)
     seurat.obj1<-CreateSeuratObject(rna_mat)
     seurat.obj1<-NormalizeData(seurat.obj1,verbose = F)
-    seurat.obj1<-FindVariableFeaturesMix(seurat.obj1,method.names = method_list[index],nfeatures = nfeatures,verbose = F)
+    seurat.obj1<-FindVariableFeaturesMix(seurat.obj1,
+                                         method.names = method_list[index],
+                                         nfeatures = nfeatures,
+                                         extra.rank = extra.rank,
+                                         verbose = F)
     seurat.obj1<-ScaleData(seurat.obj1,verbose = F)
     seurat.obj1<-RunPCA(seurat.obj1,npcs=30,verbose=F)
 
